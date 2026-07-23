@@ -29,6 +29,23 @@
 /* ---- hidden content until fullscreen ---- */
 #content { display:none; }
 #content.show { display:block; }
+/* ---- edit mode ---- */
+.edit-toggle { position:fixed; bottom:16px; right:16px; z-index:99990; width:48px; height:48px; border-radius:50%; background:#1a73e8; color:#fff; border:none; font-size:22px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.3); display:none; align-items:center; justify-content:center; }
+.edit-toggle.show { display:flex; }
+.edit-bar { display:none; position:fixed; bottom:0; left:0; right:0; z-index:99989; background:#fff; border-top:2px solid #1a73e8; padding:10px 16px; gap:10px; align-items:center; justify-content:center; font-family:'Google Sans',Roboto,Arial,sans-serif; }
+.edit-bar.show { display:flex; }
+.edit-bar .ebtn { padding:8px 20px; border-radius:20px; border:none; font-size:14px; font-weight:500; cursor:pointer; }
+.ebtn-save { background:#01875f; color:#fff; }
+.ebtn-exit { background:#e8eaed; color:#1a1a1a; }
+.edit-bar .ebtn:disabled { opacity:.5; pointer-events:none; }
+.editable-editing { outline:2px dashed #1a73e8 !important; cursor:text; }
+.edit-popup { display:none; position:fixed; z-index:99991; background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 20px rgba(0,0,0,.25); min-width:240px; }
+.edit-popup.show { display:block; }
+.edit-popup textarea { width:100%; border:1px solid #dadce0; border-radius:6px; padding:8px; font-size:14px; font-family:inherit; resize:vertical; min-height:60px; }
+.edit-popup .ep-apply { background:#01875f; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:13px; cursor:pointer; margin-top:6px; width:100%; }
+.edit-popup .ep-upload { border:2px dashed #dadce0; border-radius:6px; padding:14px; text-align:center; cursor:pointer; font-size:13px; color:#5f6368; margin-bottom:8px; }
+.edit-popup .ep-upload:hover { border-color:#01875f; background:#f0fdf8; }
+.edit-popup .ep-url { width:100%; padding:8px; border:1px solid #dadce0; border-radius:4px; font-size:13px; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -37,6 +54,14 @@
   <div id="app" class="loading">Carregando...</div>
   <div id="content"></div>
 </div>
+
+<button class="edit-toggle" id="editToggle" title="Editar página">✏️</button>
+<div class="edit-bar" id="editBar">
+  <span style="font-size:13px;color:#5f6368">Modo Edição</span>
+  <button class="ebtn ebtn-save" id="editSave">💾 Salvar</button>
+  <button class="ebtn ebtn-exit" id="editExit">Sair</button>
+</div>
+<div class="edit-popup" id="editPopup"></div>
 
 <div class="modal-overlay" id="notifModal">
   <div class="modal-box">
@@ -379,6 +404,186 @@ function footerHtml(c) {
   document.addEventListener('scroll', onScroll, {passive: true, capture: true});
   var pc = document.getElementById('pageContainer');
   if (pc) pc.addEventListener('scroll', onScroll, {passive: true});
+})();
+
+/* ---- visual editor ---- */
+(function() {
+  var editing = false;
+  var toggle = document.getElementById('editToggle');
+  var bar = document.getElementById('editBar');
+  var popup = document.getElementById('editPopup');
+  var content = document.getElementById('content');
+  var currentPath = null;
+
+  function showToggle() { toggle.classList.add('show'); }
+  showToggle();
+
+  toggle.addEventListener('click', function() { editing = !editing; updateMode(); });
+  document.getElementById('editExit').addEventListener('click', function() { editing = false; updateMode(); });
+  document.getElementById('editSave').addEventListener('click', saveEdits);
+
+  function updateMode() {
+    bar.classList.toggle('show', editing);
+    document.querySelectorAll('.editable-el').forEach(function(e) { e.classList.toggle('edit-hover', editing); });
+    if (!editing) { popup.classList.remove('show'); }
+  }
+
+  function findPath(el) {
+    while (el && el !== content) {
+      if (el.dataset.path) return el.dataset.path;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function getVal(path) {
+    var parts = path.split('.'), o = CONFIGS.kingshot;
+    for (var i = 0; i < parts.length; i++) { if (o == null) return ''; o = o[parts[i]]; }
+    return o !== undefined && o !== null ? o : '';
+  }
+
+  function setVal(path, val) {
+    var parts = path.split('.'), o = CONFIGS.kingshot;
+    for (var i = 0; i < parts.length - 1; i++) {
+      if (!o[parts[i]]) o[parts[i]] = {};
+      o = o[parts[i]];
+    }
+    o[parts[parts.length - 1]] = val;
+  }
+
+  function escVal(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = '' + s; return d.innerHTML; }
+
+  function showPopup(x, y, innerHTML) { popup.innerHTML = innerHTML; popup.style.left = Math.min(x, window.innerWidth - 260) + 'px'; popup.style.top = Math.min(y, window.innerHeight - 200) + 'px'; popup.classList.add('show'); }
+  function hidePopup() { popup.classList.remove('show'); }
+
+  function saveEdits() {
+    var btn = document.getElementById('editSave');
+    btn.disabled = true; btn.textContent = 'Salvando...';
+    fetch('/api/save-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(CONFIGS) })
+      .then(function(r) { return r.json(); })
+      .then(function(resp) {
+        if (resp.ok) { alert('✅ Salvo com sucesso!'); } else { alert('Erro: ' + (resp.error || '')); }
+      }).catch(function(e) { alert('Erro: ' + e.message); })
+      .then(function() { btn.disabled = false; btn.textContent = '💾 Salvar'; });
+  }
+
+  // inject data-path attributes into rendered DOM
+  function injectPaths() {
+    var c = CONFIGS.kingshot;
+    var walker = [
+      {sel: '.app-icon-large', path: 'app.icon', type: 'img'},
+      {sel: '.app-title-h1', path: 'app.title', type: 'text'},
+      {sel: '.app-developer-link', path: 'app.developer', type: 'text'},
+      {sel: '.app-badge', path: 'app.badge', type: 'text'},
+      {sel: '.rating-number', path: 'app.rating', type: 'text'},
+      {sel: '.section-heading:nth-of-type(1)', path: 'about.title', type: 'text'},
+      {sel: '.safety-description', path: 'dataSafety.description', type: 'text'},
+      {sel: '.content-rating-label', path: 'contentRating.label', type: 'text'},
+      {sel: '.content-rating-detail', path: 'contentRating.details', type: 'text'},
+      {sel: '.support-label', path: 'appSupport.label', type: 'text'},
+      {sel: '.support-detail', path: 'appSupport.detail', type: 'text'},
+      {sel: '.whatsnew-text', path: 'whatsNew.content', type: 'text'},
+      {sel: '.about-date', path: 'app.updated', type: 'text'},
+      {sel: '.footer-country svg + *', path: 'footer.country', type: 'textNode'},
+    ];
+    walker.forEach(function(w) {
+      var els = content.querySelectorAll(w.sel);
+      els.forEach(function(el, i) {
+        var p = w.path;
+        if (w.type === 'textNode' && el.nextSibling) {
+          var span = document.createElement('span'); span.dataset.path = p; span.className = 'editable-el'; span.textContent = el.nextSibling.textContent; el.parentNode.insertBefore(span, el.nextSibling); el.nextSibling.remove();
+          return;
+        }
+        if (el.dataset.path) return;
+        el.dataset.path = p;
+        el.className = (el.className + ' editable-el').trim();
+      });
+    });
+    // about sections
+    var sections = content.querySelectorAll('.about-text > div, .about-text > p');
+    if (c.about && c.about.sections) {
+      c.about.sections.forEach(function(s, i) {
+        if (sections[i]) { sections[i].dataset.path = 'about.sections.' + i + '.content'; sections[i].classList.add('editable-el'); }
+      });
+    }
+    // chips
+    var chips = content.querySelectorAll('.chip');
+    if (c.categories) {
+      c.categories.forEach(function(cat, i) { if (chips[i]) { chips[i].dataset.path = 'categories.' + i; chips[i].classList.add('editable-el'); } });
+    }
+    // reviews
+    var rnames = content.querySelectorAll('.review-author');
+    var rtexts = content.querySelectorAll('.review-text');
+    if (c.reviews && c.reviews.items) {
+      c.reviews.items.forEach(function(r, i) {
+        if (rnames[i]) { rnames[i].dataset.path = 'reviews.items.' + i + '.name'; rnames[i].classList.add('editable-el'); }
+        if (rtexts[i]) { rtexts[i].dataset.path = 'reviews.items.' + i + '.text'; rtexts[i].classList.add('editable-el'); }
+      });
+    }
+    // star counts
+    var blabels = content.querySelectorAll('.bar-label');
+    if (c.reviews && c.reviews.stars) {
+      blabels.forEach(function(l) { var n = l.textContent.trim(); if (c.reviews.stars[n]) { l.nextElementSibling.nextElementSibling.dataset.path = 'reviews.stars.' + n; l.nextElementSibling.nextElementSibling.classList.add('editable-el'); } });
+    }
+  }
+
+  // content click handler
+  content.addEventListener('click', function(e) {
+    if (!editing) return;
+    var path = findPath(e.target);
+    if (!path) return;
+    hidePopup();
+    currentPath = path;
+    var val = getVal(path);
+    if (e.target.tagName === 'IMG' || path.endsWith('.icon') || path.endsWith('.image')) {
+      showPopup(e.clientX, e.clientY, '<div class="ep-upload" onclick="document.getElementById(\'editFileInput\').click()">📷 Clique para trocar imagem</div><input id="editFileInput" type="file" accept="image/*" style="display:none"><hr style="margin:8px 0;border-top:1px solid #dadce0"><label style="font-size:11px;color:#5f6368">URL:</label><input class="ep-url" id="editUrl" value="' + escVal(val) + '"><button class="ep-apply" onclick="applyEditUrl()">Aplicar</button>');
+      var fi = popup.querySelector('#editFileInput');
+      fi.addEventListener('change', function() { if (this.files.length) uploadEditFile(this.files[0]); });
+      popup.querySelector('.ep-upload').addEventListener('dragover', function(ev) { ev.preventDefault(); });
+      popup.querySelector('.ep-upload').addEventListener('drop', function(ev) { ev.preventDefault(); if (ev.dataTransfer.files.length) uploadEditFile(ev.dataTransfer.files[0]); });
+    } else {
+      showPopup(e.clientX, e.clientY, '<textarea id="editText">' + escVal(String(val)) + '</textarea><button class="ep-apply" onclick="applyEditText()">Aplicar</button>');
+      document.getElementById('editText').focus();
+    }
+    e.stopPropagation();
+  });
+
+  function uploadEditFile(file) {
+    var fd = new FormData(); fd.append('image', file);
+    fetch('/api/upload', { method: 'POST', body: fd })
+      .then(function(r) { return r.json(); })
+      .then(function(resp) {
+        if (resp.url) {
+          var url = location.protocol + '//' + location.host + resp.url;
+          document.getElementById('editUrl').value = url;
+          alert('Imagem enviada! Clique em Aplicar.');
+        } else { alert('Erro: ' + (resp.error || '')); }
+      }).catch(function(e) { alert('Erro: ' + e.message); });
+  }
+
+  window.applyEditText = function() {
+    var val = document.getElementById('editText').value;
+    if (currentPath) { setVal(currentPath, val); updateElement(currentPath, val); }
+    hidePopup();
+  };
+  window.applyEditUrl = function() {
+    var val = document.getElementById('editUrl').value;
+    if (currentPath) { setVal(currentPath, val); updateElement(currentPath, val); }
+    hidePopup();
+  };
+
+  function updateElement(path, val) {
+    var el = content.querySelector('[data-path="' + CSS.escape(path) + '"]');
+    if (!el) el = document.querySelector('[data-path="' + CSS.escape(path) + '"]');
+    if (!el) return;
+    if (el.tagName === 'IMG') { el.src = val; }
+    else { el.textContent = val; }
+  }
+
+  document.addEventListener('click', function(e) { if (!e.target.closest('.edit-popup') && !e.target.closest('.editable-el')) hidePopup(); });
+
+  // run after render
+  setTimeout(injectPaths, 100);
 })();
 
 </script>
