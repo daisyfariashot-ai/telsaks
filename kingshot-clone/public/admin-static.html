@@ -430,38 +430,24 @@ function ghApi(path, method, body) {
 }
 
 document.getElementById('publishBtn').addEventListener('click', function() {
-  this.disabled = true; this.textContent = 'Publicando...';
-  showStatus('Iniciando publicação...', 'success');
+  this.disabled = true; this.textContent = 'Salvando...';
+  showStatus('Salvando no servidor...', 'success');
   localStorage.setItem('playstore_configs', JSON.stringify(CONFIGS));
-  var json = JSON.stringify(CONFIGS, null, 2);
-
-  buildUpdatedHTML(json).then(function(updatedHtml) {
-    var content = btoa(unescape(encodeURIComponent(updatedHtml)));
-    // Get current file SHA first
-    return ghApi('/contents/kingshot-clone/public/index.html?ref=' + GH_BRANCH).then(function(resp) {
-      var sha = resp.sha;
-      return ghApi('/contents/kingshot-clone/public/index.html', 'PUT', {
-        message: 'feat: update play store config via admin',
-        content: content,
-        sha: sha,
-        branch: GH_BRANCH
-      });
-    });
-  }).then(function() {
-    showStatus('✅ Publicado no GitHub! Redeploy automático acionado...', 'success');
-    // Trigger Coolify redeploy
-    return fetch(COOLIFY_URL + '/api/v1/deploy?uuid=kqy12noujzwacb5ukf6a634r', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + COOLIFY_TOKEN, 'Content-Type': 'application/json' }
-    });
-  }).then(function() {
-    showStatus('✅ Publicado e redeploy acionado!', 'success');
-    document.getElementById('publishBtn').disabled = false;
-    document.getElementById('publishBtn').textContent = '💾 Salvar e Publicar (GitHub)';
+  return fetch('/api/save-config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(CONFIGS)
+  }).then(function(r) { return r.json(); }).then(function(resp) {
+    if (resp.ok) {
+      showStatus('✅ Salvo! As mudanças já estão no ar.', 'success');
+    } else {
+      showStatus('Erro: ' + (resp.error || 'desconhecido'), 'error');
+    }
   }).catch(function(e) {
-    showStatus('Erro: ' + e.message, 'error');
+    showStatus('Erro ao salvar: ' + e.message, 'error');
+  }).then(function() {
     document.getElementById('publishBtn').disabled = false;
-    document.getElementById('publishBtn').textContent = '💾 Salvar e Publicar (GitHub)';
+    document.getElementById('publishBtn').textContent = '💾 Salvar e Publicar';
   });
 });
 
