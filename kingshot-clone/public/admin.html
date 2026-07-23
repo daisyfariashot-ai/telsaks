@@ -186,6 +186,46 @@ function buildPreview() {
   // data safety
   html += '<div class="section-header-row"><h2 class="section-heading editable" data-path="dataSafety.title">' + esc(c.dataSafety.title) + '</h2></div>';
   html += '<div class="safety-description editable" data-path="dataSafety.description">' + esc(c.dataSafety.description) + '</div>';
+
+  // reviews
+  if (c.reviews) {
+    var rating = parseFloat((c.reviews.rating || '0').replace(',', '.'));
+    html += '<hr class="section-divider">';
+    html += '<div class="section-header-row"><h2 class="section-heading editable" data-path="reviews.title">' + esc(c.reviews.title) + '</h2></div>';
+    html += '<div class="ratings-container">';
+    html += '<div class="rating-left"><div class="big-num editable" data-path="reviews.rating">' + esc(c.reviews.rating) + '</div><div class="total-reviews editable" data-path="reviews.totalReviews">' + esc(c.reviews.totalReviews) + '</div></div>';
+    html += '<div class="rating-bars">';
+    ['5','4','3','2','1'].forEach(function(n) {
+      html += '<div class="rating-bar-row"><span class="bar-label">' + n + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (parseInt((c.reviews.stars[n]||'0').replace(/\./g,''))||0)*.0001 + '%"></div></div><span class="bar-count editable" data-path="reviews.stars.' + n + '">' + esc(c.reviews.stars[n]) + '</span></div>';
+    });
+    html += '</div></div>';
+    if (c.reviews.items) {
+      c.reviews.items.forEach(function(r, i) {
+        html += '<div class="review-item" style="position:relative">';
+        html += '<button class="del-btn" style="top:8px;right:8px" onclick="event.stopPropagation();removeArrayItem(\'reviews.items\',' + i + ')">✕</button>';
+        html += '<div class="review-header"><div class="review-avatar">' + (r.name ? r.name.charAt(0).toUpperCase() : '?') + '</div><div>';
+        html += '<div class="review-author editable" data-path="reviews.items.' + i + '.name">' + esc(r.name) + '</div>';
+        html += '<div class="review-date editable" data-path="reviews.items.' + i + '.date">' + esc(r.date) + '</div></div>';
+        html += '<div class="review-stars editable" data-path="reviews.items.' + i + '.stars">' + starsSvg(r.stars, 5) + '</div></div>';
+        html += '<div class="review-text editable" data-path="reviews.items.' + i + '.text">' + esc(r.text) + '</div>';
+        if (r.helpful > 0) html += '<div class="review-helpful">Essa avaliação foi útil por <span class="editable" data-path="reviews.items.' + i + '.helpful">' + r.helpful + '</span> pessoa(s)</div>';
+        html += '</div>';
+      });
+    }
+    html += '<button class="chip editable" onclick="addReview()" style="border-style:dashed;color:#5f6368;width:100%">+ adicionar review</button>';
+  }
+
+  // whats new
+  html += '<div class="section-header-row"><h2 class="section-heading editable" data-path="whatsNew.title">' + esc(c.whatsNew ? c.whatsNew.title : '') + '</h2></div>';
+  html += '<div class="whatsnew-text editable" data-path="whatsNew.content">' + esc(c.whatsNew ? c.whatsNew.content : '') + '</div>';
+
+  // content rating
+  html += '<div class="content-rating-row" style="padding:12px 0"><div class="content-rating-label editable" data-path="contentRating.label">' + esc(c.contentRating ? c.contentRating.label : '') + '</div><div class="content-rating-detail editable" data-path="contentRating.details">' + esc(c.contentRating ? c.contentRating.details : '') + '</div></div>';
+
+  // app support
+  html += '<div class="section-header-row"><h2 class="section-heading">Suporte do app</h2></div>';
+  html += '<div class="support-section"><div class="support-left"><div class="support-icon">📧</div><div><div class="support-label editable" data-path="appSupport.label">' + esc(c.appSupport ? c.appSupport.label : '') + '</div><div class="support-detail editable" data-path="appSupport.detail">' + esc(c.appSupport ? c.appSupport.detail : '') + '</div></div></div></div>';
+
   html += '</main>';
 
   // footer with save hint
@@ -397,6 +437,15 @@ function addAboutSection() {
   about.sections.push({type:'text', content:''});
   render();
   showStatus('Seção adicionada! Edite clicando.', 'success');
+}
+
+function addReview() {
+  var rev = getVal('reviews');
+  if (!rev) { setVal('reviews', {title:'',rating:'4,5',totalReviews:'',stars:{1:'0',2:'0',3:'0',4:'0',5:'0'},items:[]}); rev = getVal('reviews'); }
+  if (!rev.items) rev.items = [];
+  rev.items.push({name:'Novo usuário', date:'1 de jan. de 2025', text:'Texto da avaliação...', stars:5, helpful:0});
+  render();
+  showStatus('Review adicionada! Edite clicando.', 'success');
 }
 
 /* ---- save ---- */
