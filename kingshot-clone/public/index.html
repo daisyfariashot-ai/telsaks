@@ -357,6 +357,22 @@ function footerHtml(c) {
   document.addEventListener('webkitfullscreenchange', onFsChange);
 })();
 
+/* ---- hide top-header on scroll down ---- */
+(function() {
+  var lastScroll = 0;
+  window.addEventListener('scroll', function() {
+    var st = window.pageYOffset || document.documentElement.scrollTop;
+    var header = document.querySelector('.top-header');
+    if (!header) return;
+    if (st > lastScroll && st > 60) {
+      header.classList.add('hidden');
+    } else {
+      header.classList.remove('hidden');
+    }
+    lastScroll = st <= 0 ? 0 : st;
+  }, {passive: true});
+})();
+
 </script>
 </body>
 </html>
