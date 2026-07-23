@@ -33,7 +33,13 @@ app.use(express.static(path.join(__dirname, '..'))); // serve root files
 app.use('/kingshot-clone/public', express.static(PUBLIC_DIR)); // serve built admin etc.
 
 app.get('/kingshot-clone/public/index.html', function(req, res) {
-  res.sendFile(INDEX_PATH);
+  if (fs.existsSync(INDEX_PATH)) {
+    res.sendFile(INDEX_PATH);
+  } else if (fs.existsSync(TEMPLATE_PATH)) {
+    res.sendFile(TEMPLATE_PATH);
+  } else {
+    res.status(404).send('index not found');
+  }
 });
 
 // Serve uploads from data dir
@@ -86,7 +92,9 @@ function replaceConfigsInHTML(html, json) {
 app.post('/api/save-config', (req, res) => {
   try {
     const configs = req.body;
-    let html = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
+    const tplPath = fs.existsSync(TEMPLATE_PATH) ? TEMPLATE_PATH : INDEX_PATH;
+    if (!fs.existsSync(tplPath)) throw new Error('no template found');
+    let html = fs.readFileSync(tplPath, 'utf-8');
     const json = JSON.stringify(configs, null, 2);
     const updated = replaceConfigsInHTML(html, json);
     fs.writeFileSync(INDEX_PATH, updated, 'utf-8');
