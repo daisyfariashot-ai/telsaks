@@ -8,15 +8,14 @@ const DATA_DIR = path.join(__dirname, '..', 'data');
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const INDEX_PATH = path.join(DATA_DIR, 'index.html');
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const CONFIG_PATH = path.join(__dirname, 'data', 'configs.json');
+const TEMPLATE_PATH = path.join(PUBLIC_DIR, '_index_template.html');
 
 // Ensure data directories exist
 [DATA_DIR, UPLOAD_DIR].forEach(function(d) { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
 
-// On startup, if no index.html in data dir, copy from built public dir
-const builtIndex = path.join(PUBLIC_DIR, 'index.html');
-if (!fs.existsSync(INDEX_PATH) && fs.existsSync(builtIndex)) {
-  fs.copyFileSync(builtIndex, INDEX_PATH);
+// On startup, copy template to volume if no persisted index
+if (!fs.existsSync(INDEX_PATH) && fs.existsSync(TEMPLATE_PATH)) {
+  fs.copyFileSync(TEMPLATE_PATH, INDEX_PATH);
 }
 
 const storage = multer.diskStorage({
@@ -33,17 +32,15 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '..'))); // serve root files
 app.use('/kingshot-clone/public', express.static(PUBLIC_DIR)); // serve built admin etc.
 
-// Custom route for index.html: serve from data dir (persisted)
 app.get('/kingshot-clone/public/index.html', function(req, res) {
-  if (fs.existsSync(INDEX_PATH)) {
-    res.sendFile(INDEX_PATH);
-  } else {
-    res.sendFile(builtIndex);
-  }
+  res.sendFile(INDEX_PATH);
 });
 
 // Serve uploads from data dir
 app.use('/uploads', express.static(UPLOAD_DIR));
+
+app.use(express.static(path.join(__dirname, '..'))); // serve root files
+app.use('/kingshot-clone/public', express.static(PUBLIC_DIR)); // serve built admin etc.
 
 function readConfigs() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
@@ -89,11 +86,10 @@ function replaceConfigsInHTML(html, json) {
 app.post('/api/save-config', (req, res) => {
   try {
     const configs = req.body;
-    let html = fs.readFileSync(builtIndex, 'utf-8');
+    let html = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
     const json = JSON.stringify(configs, null, 2);
     const updated = replaceConfigsInHTML(html, json);
     fs.writeFileSync(INDEX_PATH, updated, 'utf-8');
-    writeConfigs(configs);
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
