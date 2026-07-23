@@ -3,534 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin - Kingshot Clone</title>
+<title>Admin - Play Store Editor</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.admin-body { background: #f7f8fa; max-width: 720px; margin: 0 auto; padding: 16px; font-family: 'Google Sans', Roboto, Arial, sans-serif; }
-h1 { font-size: 22px; margin-bottom: 16px; }
-h2 { font-size: 16px; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #e8eaed; }
-.section { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #e8eaed; }
-.field { margin-bottom: 12px; }
-.field label { display: block; font-size: 12px; font-weight: 600; color: #5f6368; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .3px; }
-.field input, .field textarea, .field select { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #dadce0; border-radius: 6px; font-family: inherit; }
-.field textarea { min-height: 60px; resize: vertical; }
-.field input:focus, .field textarea:focus { border-color: #01875f; outline: none; }
-.array-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
-.array-item input { width: calc(100% - 80px); }
-.array-item .btn-remove { background: #e8eaed; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: #c5221f; margin-left: 6px; }
-.array-item .btn-remove:hover { background: #fce8e6; }
-.btn-add { background: #e8eaed; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; color: #1a1a1a; }
-.btn-add:hover { background: #dadce0; }
-.btn-save { background: #01875f; color: #fff; border: none; border-radius: 24px; padding: 12px 40px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; text-transform: uppercase; letter-spacing: .5px; }
-.btn-save:hover { background: #016e4c; }
-.status { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; display: none; }
-.status.success { background: #e6f4ea; color: #137333; display: block; }
-.status.error { background: #fce8e6; color: #c5221f; display: block; }
-.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; background: #fff; border-radius: 24px; padding: 4px; border: 1px solid #e8eaed; overflow-x: auto; }
-.tab { padding: 8px 16px; font-size: 13px; border: none; background: transparent; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 500; color: #5f6368; }
-.tab.active { background: #01875f; color: #fff; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.about-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
-.about-item select { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 6px; }
-.about-item textarea { width: 100%; min-height: 50px; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; resize: vertical; font-family: inherit; }
-.full-width-btn { display: block; width: 100%; margin: 4px 0; }
-.review-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
-.review-item .row { display: flex; gap: 8px; margin-bottom: 6px; }
-.review-item .row input { flex: 1; }
-.safety-item-edit { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
-.safety-item-edit select, .safety-item-edit input { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 4px; }
-.app-manager { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid #e8eaed; }
-.app-manager select { flex: 1; }
-@media (max-width: 480px) { .admin-body { padding: 12px; } .tab { padding: 6px 12px; font-size: 12px; } }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Google Sans', Roboto, Arial, sans-serif; background:#e8eaed; color:#202124; }
+.editor-header { position:sticky; top:0; z-index:9999; background:#fff; border-bottom:1px solid #dadce0; padding:8px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.editor-header h1 { font-size:18px; font-weight:500; margin-right:auto; }
+.editor-header .btn { padding:8px 20px; border-radius:20px; border:none; font-size:13px; font-weight:500; cursor:pointer; }
+.btn-preview { background:#e8eaed; color:#1a1a1a; }
+.btn-preview:hover { background:#dadce0; }
+.btn-save { background:#01875f; color:#fff; }
+.btn-save:hover { background:#016e4c; }
+.btn-save:disabled { opacity:.5; cursor:default; }
+.status { padding:6px 12px; border-radius:6px; font-size:13px; display:none; }
+.status.success { background:#e6f4ea; color:#137333; display:inline-block; }
+.status.error { background:#fce8e6; color:#c5221f; display:inline-block; }
+
+.preview-wrapper { max-width:480px; margin:16px auto; background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.12); overflow:hidden; position:relative; }
+.editable { transition:outline .15s; cursor:pointer; }
+.editable:hover { outline:2px dashed #1a73e8; outline-offset:-1px; }
+.editable.editing { outline:2px solid #1a73e8; background:rgba(26,115,232,.05); }
+.editable img.editable { cursor:pointer; }
+
+.edit-toolbar { display:none; position:absolute; z-index:999; background:#1a73e8; color:#fff; border-radius:8px; padding:6px 10px; font-size:12px; gap:8px; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.edit-toolbar.show { display:flex; }
+.edit-toolbar button { background:rgba(255,255,255,.2); border:none; color:#fff; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; }
+.edit-toolbar button:hover { background:rgba(255,255,255,.3); }
+.edit-toolbar .label { font-weight:500; margin-right:4px; }
+
+.inline-upload { display:none; position:absolute; z-index:1000; background:#fff; border-radius:8px; padding:12px; box-shadow:0 4px 16px rgba(0,0,0,.2); border:1px solid #dadce0; width:260px; }
+.inline-upload.show { display:block; }
+.inline-upload .drop-area { border:2px dashed #dadce0; border-radius:6px; padding:16px; text-align:center; cursor:pointer; font-size:12px; color:#5f6368; }
+.inline-upload .drop-area:hover { border-color:#01875f; background:#f0fdf8; }
+.inline-upload .preview-area { text-align:center; margin-top:8px; }
+.inline-upload .preview-area img { max-width:100%; max-height:100px; border-radius:4px; }
+.inline-upload .url-field { width:100%; padding:6px; font-size:12px; border:1px solid #dadce0; border-radius:4px; margin-top:6px; }
+.inline-upload .btn-apply { background:#01875f; color:#fff; border:none; border-radius:4px; padding:6px 12px; font-size:12px; cursor:pointer; margin-top:6px; width:100%; }
+
+.text-editor { display:none; position:absolute; z-index:1000; background:#fff; border-radius:8px; padding:10px; box-shadow:0 4px 16px rgba(0,0,0,.2); border:1px solid #dadce0; min-width:200px; }
+.text-editor.show { display:block; }
+.text-editor textarea { width:100%; border:1px solid #dadce0; border-radius:4px; padding:6px; font-size:13px; font-family:inherit; resize:vertical; min-height:60px; }
+.text-editor .btn-apply-text { background:#01875f; color:#fff; border:none; border-radius:4px; padding:6px 12px; font-size:12px; cursor:pointer; margin-top:4px; width:100%; }
+
+.picker { display:none; position:absolute; z-index:1000; background:#fff; border-radius:8px; padding:12px; box-shadow:0 4px 16px rgba(0,0,0,.2); border:1px solid #dadce0; min-width:180px; }
+.picker.show { display:block; }
+.picker select { width:100%; padding:6px; font-size:13px; border:1px solid #dadce0; border-radius:4px; }
+.picker .btn-pick { background:#01875f; color:#fff; border:none; border-radius:4px; padding:6px 12px; font-size:12px; cursor:pointer; margin-top:6px; width:100%; }
+
+.app-icon-large.editable { border-radius:20%; }
 </style>
 </head>
 <body>
-<div class="admin-body" id="admin">
-  <h1>Admin - Play Store Clone</h1>
-  <div class="status" id="status"></div>
-  <div class="app-manager">
-    <select id="appSelect" style="flex:1;padding:8px;font-size:14px;border:1px solid #dadce0;border-radius:6px"></select>
-    <button class="btn-add" id="newAppBtn" style="white-space:nowrap">+ Novo</button>
-    <button class="btn-remove" id="delAppBtn" style="white-space:nowrap">Excluir</button>
-    <a id="previewLink" target="_blank" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:13px;color:#01875f;text-decoration:none;font-weight:500">Abrir</a>
-  </div>
-  <div class="tab-bar" id="tabs"></div>
-  <div id="forms"></div>
-  <button class="btn-save" id="saveBtn" style="margin-top:16px">Salvar tudo</button>
+<div class="editor-header">
+  <h1>✏️ Editor Play Store</h1>
+  <div id="status" class="status"></div>
+  <button class="btn btn-preview" onclick="window.open('/kingshot-clone/public/index.html','_blank')">Abrir Preview</button>
+  <button class="btn btn-save" id="saveBtn" onclick="saveAll()">💾 Salvar e Publicar</button>
 </div>
+
+<div id="toolbar" class="edit-toolbar"></div>
+<div id="uploader" class="inline-upload"></div>
+<div id="textEditor" class="text-editor"></div>
+<div id="picker" class="picker"></div>
+
+<div class="preview-wrapper" id="app">Carregando...</div>
+
 <script>
-function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = '' + s; return d.innerHTML; }
-let config = null;
-let currentSlug = '';
-let appList = [];
-const fields = [
-  { id: 'header', label: 'Header', tabs: [
-    { id: 'header_main', label: 'Header', fields: [
-      { key: 'header.logo', label: 'URL do Logo', type: 'text' },
-      { key: 'header.title', label: 'Título', type: 'text' },
-    ]},
-  ]},
-  { id: 'app', label: 'App', tabs: [
-    { id: 'app_basic', label: 'Básico', fields: [
-      { key: 'app.icon', label: 'URL do Ícone', type: 'text' },
-      { key: 'app.title', label: 'Título do App', type: 'text' },
-      { key: 'app.developer', label: 'Desenvolvedor', type: 'text' },
-      { key: 'app.developerUrl', label: 'URL do Desenvolvedor', type: 'text' },
-      { key: 'app.badge', label: 'Badge', type: 'text' },
-      { key: 'app.rating', label: 'Nota', type: 'text' },
-      { key: 'app.reviews', label: 'Avaliações', type: 'text' },
-      { key: 'app.downloads', label: 'Downloads', type: 'text' },
-      { key: 'app.updated', label: 'Atualizado em', type: 'text' },
-    ]},
-    { id: 'app_screenshots', label: 'Screenshots', type: 'array', key: 'screenshots' },
-    { id: 'app_categories', label: 'Categorias', type: 'array', key: 'categories' },
-  ]},
-  { id: 'about', label: 'Sobre', tabs: [
-    { id: 'about_tab', label: 'Sobre o jogo', type: 'about' },
-  ]},
-  { id: 'safety', label: 'Segurança', tabs: [
-    { id: 'safety_main', label: 'Dados', fields: [
-      { key: 'dataSafety.title', label: 'Título', type: 'text' },
-      { key: 'dataSafety.description', label: 'Descrição', type: 'textarea' },
-    ]},
-    { id: 'safety_items', label: 'Itens', type: 'safetyItems' },
-  ]},
-  { id: 'support', label: 'Suporte', tabs: [
-    { id: 'support_main', label: 'Suporte', fields: [
-      { key: 'appSupport.label', label: 'Label (ex: E-mail)', type: 'text' },
-      { key: 'appSupport.detail', label: 'Detalhes (ex: email@dev.com)', type: 'text' },
-    ]},
-  ]},
-  { id: 'reviews', label: 'Avaliações', tabs: [
-    { id: 'rev_tab', label: 'Avaliações', fields: [
-      { key: 'reviews.title', label: 'Título', type: 'text' },
-      { key: 'reviews.rating', label: 'Nota Geral', type: 'text' },
-      { key: 'reviews.totalReviews', label: 'Total Avaliações', type: 'text' },
-      { key: 'reviews.stars.5', label: 'Estrelas 5', type: 'text' },
-      { key: 'reviews.stars.4', label: 'Estrelas 4', type: 'text' },
-      { key: 'reviews.stars.3', label: 'Estrelas 3', type: 'text' },
-      { key: 'reviews.stars.2', label: 'Estrelas 2', type: 'text' },
-      { key: 'reviews.stars.1', label: 'Estrelas 1', type: 'text' },
-    ]},
-    { id: 'rev_items', label: 'Reviews', type: 'reviews' },
-  ]},
-  { id: 'more', label: 'Extras', tabs: [
-    { id: 'whatsnew', label: 'Novidades', fields: [
-      { key: 'whatsNew.title', label: 'Título', type: 'text' },
-      { key: 'whatsNew.content', label: 'Conteúdo', type: 'textarea' },
-    ]},
-    { id: 'content_rating', label: 'Classificação', fields: [
-      { key: 'contentRating.label', label: 'Label', type: 'text' },
-      { key: 'contentRating.details', label: 'Detalhes', type: 'text' },
-    ]},
-    { id: 'events', label: 'Eventos', type: 'events' },
-    { id: 'dev_games', label: 'Do Desenvolvedor', type: 'gameList', key: 'developerMore' },
-    { id: 'similar_games', label: 'Semelhantes', type: 'gameList', key: 'similarGames' },
-    { id: 'footer_edit', label: 'Footer', type: 'footer' },
-  ]},
-];
+var CONFIGS = null;
+var currentPath = null;
+var currentField = null;
 
-const tabBar = document.getElementById('tabs');
-const formsContainer = document.getElementById('forms');
-const statusEl = document.getElementById('status');
-
-let activeSection = 0;
-let activeTab = {};
-
-async function loadAppList() {
-  const r = await fetch('/api/configs');
-  appList = await r.json();
-  const sel = document.getElementById('appSelect');
-  sel.innerHTML = appList.map(a => `<option value="${esc(a.slug)}" ${a.slug === currentSlug ? 'selected' : ''}>${esc(a.title)}</option>`).join('');
-  document.getElementById('previewLink').href = `/?app=${encodeURIComponent(currentSlug)}`;
-}
-
-async function loadConfig(slug) {
-  currentSlug = slug || currentSlug;
-  const r = await fetch('/api/config?app=' + encodeURIComponent(currentSlug));
-  config = await r.json();
-  await loadAppList();
-  renderTabs();
-}
-
-function init() { loadConfig('kingshot'); }
-
-document.getElementById('appSelect').addEventListener('change', e => loadConfig(e.target.value));
-document.getElementById('newAppBtn').addEventListener('click', async () => {
-  const name = prompt('Nome do novo app (slug):', 'meu-app');
-  if (!name) return;
-  const r = await fetch('/api/configs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: name, title: name }) });
-  if (!r.ok) return alert('Erro: slug já existe ou inválido');
-  await loadConfig(name);
-});
-document.getElementById('delAppBtn').addEventListener('click', async () => {
-  if (!confirm(`Excluir "${currentSlug}"?`)) return;
-  await fetch('/api/config?app=' + encodeURIComponent(currentSlug), { method: 'DELETE' });
-  const remaining = appList.filter(a => a.slug !== currentSlug);
-  if (remaining.length) await loadConfig(remaining[0].slug);
-  else await loadConfig('kingshot');
-});
-
-function renderTabs() {
-  tabBar.innerHTML = fields.map((f, i) =>
-    `<button class="tab ${i === activeSection ? 'active' : ''}" data-section="${i}">${f.label}</button>`
-  ).join('');
-  tabBar.querySelectorAll('.tab').forEach(el => {
-    el.addEventListener('click', () => {
-      activeSection = parseInt(el.dataset.section);
-      renderTabs();
-    });
-  });
-  renderForms();
-}
-
-function renderForms() {
-  formsContainer.innerHTML = '';
-  const section = fields[activeSection];
-  activeTab[activeSection] = activeTab[activeSection] || 0;
-  const tabHtml = section.tabs.map((t, i) =>
-    `<button class="tab ${i === activeTab[activeSection] ? 'active' : ''}" data-tab="${i}">${t.label}</button>`
-  ).join('');
-  const tabBar2 = document.createElement('div');
-  tabBar2.className = 'tab-bar';
-  tabBar2.innerHTML = tabHtml;
-  tabBar2.querySelectorAll('[data-tab]').forEach(el => {
-    el.addEventListener('click', () => {
-      activeTab[activeSection] = parseInt(el.dataset.tab);
-      renderForms();
-    });
-  });
-  formsContainer.appendChild(tabBar2);
-  const tab = section.tabs[activeTab[activeSection]];
-  if (tab.type === 'array') renderArrayField(tab);
-  else if (tab.type === 'about') renderAbout();
-  else if (tab.type === 'reviews') renderReviews();
-  else if (tab.type === 'events') renderEvents();
-  else if (tab.type === 'gameList') renderGameList(tab);
-  else if (tab.type === 'safetyItems') renderSafetyItems();
-  else if (tab.type === 'footer') renderFooter();
-  else renderFields(tab.fields);
-}
-
-function renderFields(fs, container) {
-  container = container || formsContainer;
-  fs.forEach(f => {
-    const div = document.createElement('div');
-    div.className = 'field';
-    const val = getVal(f.key) || '';
-    if (f.type === 'textarea') {
-      div.innerHTML = `<label>${f.label}</label><textarea data-key="${f.key}">${h(val)}</textarea>`;
-    } else {
-      div.innerHTML = `<label>${f.label}</label><input type="${f.type}" data-key="${f.key}" value="${h(val)}">`;
-    }
-    container.appendChild(div);
-    const el = div.querySelector('[data-key]');
-    el.addEventListener('input', () => setVal(f.key, el.value));
-  });
-}
-
-function renderArrayField(tab) {
-  const container = document.createElement('div');
-  container.className = 'section';
-  renderArray(tab.key, container, (item, ci) => {
-    return `<div class="array-item"><input type="text" value="${h(item)}" data-idx="${ci}"><button class="btn-remove" data-action="remove" data-idx="${ci}">Remover</button></div>`;
-  }, () => {
-    const arr = getValRaw(tab.key) || [];
-    arr.push('');
-    setValRaw(tab.key, arr);
-    renderForms();
-  });
-  formsContainer.appendChild(container);
-}
-
-function renderAbout() {
-  const container = document.createElement('div');
-  container.className = 'section';
-  const data = config.about;
-  if (!data) return;
-  renderFields([{ key: 'about.title', label: 'Título', type: 'text' }], container);
-  const sections = data.sections || [];
-  sections.forEach((s, i) => {
-    const div = document.createElement('div');
-    div.className = 'about-item';
-    div.innerHTML = `
-      <select data-idx="${i}">
-        <option value="text" ${s.type === 'text' ? 'selected' : ''}>Texto</option>
-        <option value="heading" ${s.type === 'heading' ? 'selected' : ''}>Título de seção</option>
-        <option value="subheading" ${s.type === 'subheading' ? 'selected' : ''}>Subtítulo</option>
-      </select>
-      <textarea data-idx="${i}">${h(s.content)}</textarea>
-      <button class="btn-remove" data-action="remove-section" data-idx="${i}">Remover</button>
-    `;
-    container.appendChild(div);
-    div.querySelector('select').addEventListener('change', e => { data.sections[i].type = e.target.value; });
-    div.querySelector('textarea').addEventListener('input', e => { data.sections[i].content = e.target.value; });
-    div.querySelector('[data-action="remove-section"]').addEventListener('click', () => {
-      data.sections.splice(i, 1);
-      renderForms();
-    });
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-add full-width-btn';
-  addBtn.textContent = '+ Adicionar seção';
-  addBtn.addEventListener('click', () => {
-    data.sections.push({ type: 'text', content: '' });
-    renderForms();
-  });
-  container.appendChild(addBtn);
-  formsContainer.appendChild(container);
-}
-
-function renderSafetyItems() {
-  const container = document.createElement('div');
-  container.className = 'section';
-  const items = config.dataSafety?.items || [];
-  items.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = 'safety-item-edit';
-    div.innerHTML = `
-      <select data-field="icon" data-idx="${i}">
-        <option value="share" ${item.icon === 'share' ? 'selected' : ''}>Compartilhar</option>
-        <option value="collect" ${item.icon === 'collect' ? 'selected' : ''}>Coletar</option>
-        <option value="encrypted" ${item.icon === 'encrypted' ? 'selected' : ''}>Criptografado</option>
-        <option value="nodelete" ${item.icon === 'nodelete' ? 'selected' : ''}>Não deletar</option>
-      </select>
-      <input placeholder="Label" value="${h(item.label)}" data-field="label" data-idx="${i}">
-      <input placeholder="Detalhe (opcional)" value="${h(item.detail)}" data-field="detail" data-idx="${i}">
-      <button class="btn-remove" data-action="remove-safety" data-idx="${i}">Remover</button>
-    `;
-    container.appendChild(div);
-    div.querySelectorAll('[data-field]').forEach(el => {
-      el.addEventListener('input', e => { items[i][el.dataset.field] = el.value; });
-    });
-    div.querySelector('[data-action="remove-safety"]').addEventListener('click', () => {
-      items.splice(i, 1);
-      renderForms();
-    });
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-add full-width-btn';
-  addBtn.textContent = '+ Adicionar item';
-  addBtn.addEventListener('click', () => {
-    items.push({ icon: 'share', label: '', detail: '' });
-    renderForms();
-  });
-  container.appendChild(addBtn);
-  formsContainer.appendChild(container);
-}
-
-function renderReviews() {
-  const container = document.createElement('div');
-  container.className = 'section';
-  const items = config.reviews.items || [];
-  items.forEach((r, i) => {
-    const div = document.createElement('div');
-    div.className = 'review-item';
-    div.innerHTML = `
-      <div class="row"><input placeholder="Nome" value="${h(r.name)}" data-field="name" data-idx="${i}"><input placeholder="Data" value="${h(r.date)}" data-field="date" data-idx="${i}"></div>
-      <div class="row"><input placeholder="Avatar URL" value="${h(r.avatar)}" data-field="avatar" data-idx="${i}"><input placeholder="Estrelas (1-5)" type="number" min="1" max="5" value="${r.stars}" data-field="stars" data-idx="${i}"></div>
-      <textarea data-field="text" data-idx="${i}" placeholder="Texto da avaliação">${h(r.text)}</textarea>
-      <div class="row" style="margin-top:6px"><input placeholder="Úteis" type="number" value="${r.helpful}" data-field="helpful" data-idx="${i}"><button class="btn-remove" data-action="remove-review" data-idx="${i}">Remover</button></div>
-    `;
-    container.appendChild(div);
-    div.querySelectorAll('[data-field]').forEach(el => {
-      el.addEventListener('input', e => {
-        items[i][el.dataset.field] = el.type === 'number' ? parseInt(el.value) || 0 : el.value;
-      });
-    });
-    div.querySelector('[data-action="remove-review"]').addEventListener('click', () => {
-      items.splice(i, 1);
-      renderForms();
-    });
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-add full-width-btn';
-  addBtn.textContent = '+ Adicionar avaliação';
-  addBtn.addEventListener('click', () => {
-    items.push({ name: '', avatar: '', stars: 5, date: '', text: '', helpful: 0 });
-    renderForms();
-  });
-  container.appendChild(addBtn);
-  formsContainer.appendChild(container);
-}
-
-function renderEvents() {
-  const container = document.createElement('div');
-  container.className = 'section';
-  const data = config.events;
-  if (!data) return;
-  renderFields([{ key: 'events.title', label: 'Título', type: 'text' }], container);
-  const items = data.items || [];
-  items.forEach((ev, i) => {
-    const div = document.createElement('div');
-    div.className = 'array-item';
-    div.innerHTML = `
-      <div style="margin-bottom:4px"><input placeholder="URL da imagem" value="${h(ev.image)}" data-idx="${i}" data-ev="image" style="width:100%"></div>
-      <div style="display:flex;gap:6px"><input placeholder="Label" value="${h(ev.label)}" data-idx="${i}" data-ev="label" style="flex:1"><input placeholder="Nome" value="${h(ev.name)}" data-idx="${i}" data-ev="name" style="flex:1"><button class="btn-remove" data-action="remove-event" data-idx="${i}">Remover</button></div>
-    `;
-    container.appendChild(div);
-    div.querySelectorAll('[data-ev]').forEach(el => {
-      el.addEventListener('input', e => items[i][el.dataset.ev] = el.value);
-    });
-    div.querySelector('[data-action="remove-event"]').addEventListener('click', () => {
-      items.splice(i, 1);
-      renderForms();
-    });
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-add full-width-btn';
-  addBtn.textContent = '+ Adicionar evento';
-  addBtn.addEventListener('click', () => {
-    items.push({ image: '', label: '', name: '' });
-    renderForms();
-  });
-  container.appendChild(addBtn);
-  formsContainer.appendChild(container);
-}
-
-function renderGameList(tab) {
-  const container = document.createElement('div');
-  container.className = 'section';
-  const data = config[tab.key];
-  if (!data) return;
-  renderFields([{ key: `${tab.key}.title`, label: 'Título', type: 'text' }], container);
-  const items = data.games || [];
-  items.forEach((g, i) => {
-    const div = document.createElement('div');
-    div.className = 'review-item';
-    div.innerHTML = `
-      <div class="row"><input placeholder="Título" value="${h(g.title)}" data-field="title" data-idx="${i}"><input placeholder="Desenvolvedor" value="${h(g.developer)}" data-field="developer" data-idx="${i}"></div>
-      <div class="row"><input placeholder="Icon URL" value="${h(g.icon)}" data-field="icon" data-idx="${i}"><input placeholder="Nota" value="${h(g.rating)}" data-field="rating" data-idx="${i}"><button class="btn-remove" data-action="remove-game" data-idx="${i}">Remover</button></div>
-    `;
-    container.appendChild(div);
-    div.querySelectorAll('[data-field]').forEach(el => {
-      el.addEventListener('input', e => items[i][el.dataset.field] = el.value);
-    });
-    div.querySelector('[data-action="remove-game"]').addEventListener('click', () => {
-      items.splice(i, 1);
-      renderForms();
-    });
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-add full-width-btn';
-  addBtn.textContent = '+ Adicionar jogo';
-  addBtn.addEventListener('click', () => {
-    items.push({ icon: '', title: '', developer: '', rating: '' });
-    renderForms();
-  });
-  container.appendChild(addBtn);
-  formsContainer.appendChild(container);
-}
-
-function renderFooter() {
-  const container = document.createElement('div');
-  container.className = 'section';
-  renderFields([{ key: 'footer.country', label: 'País', type: 'text' }], container);
-  ['links', 'family', 'legal'].forEach(group => {
-    const h = document.createElement('h2');
-    h.textContent = { links: 'Links', family: 'Família', legal: 'Legal' }[group];
-    container.appendChild(h);
-    renderArray('footer.' + group, container, (item, ci) => {
-      return `<div class="array-item"><input type="text" value="${h(item)}" data-idx="${ci}"><button class="btn-remove" data-action="remove" data-idx="${ci}">Remover</button></div>`;
-    }, () => {
-      const arr = getValRaw('footer.' + group) || [];
-      arr.push('');
-      setValRaw('footer.' + group, arr);
-      renderForms();
-    });
-  });
-  formsContainer.appendChild(container);
-}
-
-function renderArray(key, container, itemHtml, onAdd) {
-  const arr = getValRaw(key) || [];
-  arr.forEach((item, i) => {
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = itemHtml(item, i);
-    container.appendChild(wrapper.firstElementChild);
-    const inputs = container.querySelectorAll(`[data-idx="${i}"]`);
-    inputs.forEach(inp => {
-      if (inp.tagName === 'INPUT') {
-        inp.addEventListener('input', e => {
-          arr[i] = inp.value;
-          setValRaw(key, arr);
-        });
-      }
-    });
-    container.querySelector(`[data-action="remove"][data-idx="${i}"]`)?.addEventListener('click', () => {
-      arr.splice(i, 1);
-      setValRaw(key, arr);
-      renderForms();
-    });
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-add full-width-btn';
-  addBtn.textContent = '+ Adicionar';
-  addBtn.addEventListener('click', onAdd);
-  container.appendChild(addBtn);
+function showStatus(msg, type) {
+  var el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  setTimeout(function() { el.className = 'status'; }, 3000);
 }
 
 function getVal(path) {
-  const parts = path.split('.');
-  let o = config;
-  for (const p of parts) o = o?.[p];
-  return o !== undefined ? o : '';
-}
-
-function getValRaw(path) {
-  const parts = path.split('.');
-  let o = config;
-  for (const p of parts) o = o?.[p];
-  return o;
+  var parts = path.split('.');
+  var o = getConfig();
+  for (var i = 0; i < parts.length; i++) {
+    if (o == null) return '';
+    o = o[parts[i]];
+  }
+  return o !== undefined && o !== null ? o : '';
 }
 
 function setVal(path, val) {
-  const parts = path.split('.');
-  let o = config;
-  for (let i = 0; i < parts.length - 1; i++) {
+  var parts = path.split('.');
+  var o = getConfig();
+  for (var i = 0; i < parts.length - 1; i++) {
     if (!o[parts[i]]) o[parts[i]] = {};
     o = o[parts[i]];
   }
   o[parts[parts.length - 1]] = val;
 }
 
-function setValRaw(key, val) {
-  const parts = key.split('.');
-  let o = config;
-  for (let i = 0; i < parts.length - 1; i++) {
-    if (!o[parts[i]]) o[parts[i]] = {};
-    o = o[parts[i]];
+function getConfig() {
+  if (!CONFIGS) CONFIGS = {};
+  if (!CONFIGS['kingshot']) CONFIGS['kingshot'] = {};
+  return CONFIGS['kingshot'];
+}
+
+/* ---- helpers ---- */
+function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = '' + s; return d.innerHTML; }
+function fillId() { return 'f' + (fillId._c = (fillId._c||0)+1); }
+function starsSvg(filled, total) {
+  var s = '', f = parseFloat(filled);
+  for (var i = 0; i < total; i++) {
+    if (i < Math.floor(f)) s += '<svg viewBox="0 0 24 24" class="star-filled" width="14" height="14"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+    else if (i < f) { var id = fillId(); s += '<svg viewBox="0 0 24 24" width="14" height="14"><defs><linearGradient id="'+id+'"><stop offset="'+(f-Math.floor(f))*100+'%" stop-color="rgb(32,33,36)"/><stop offset="'+(f-Math.floor(f))*100+'%" stop-color="rgb(218,220,224)"/></linearGradient></defs><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#'+id+')"/></svg>'; }
+    else s += '<svg viewBox="0 0 24 24" class="star-empty" width="14" height="14"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
   }
-  o[parts[parts.length - 1]] = val;
+  return s;
 }
 
-function h(s) {
-  if (!s) return '';
-  const d = document.createElement('div');
-  d.textContent = '' + s;
-  return d.innerHTML;
-}
+/* ---- build preview page ---- */
+function buildPreview() {
+  var c = getConfig();
+  var html = '';
+  // header
+  html += '<nav class="top-header" aria-label="Cabeçalho"><a class="play-logo-link" href="/store/games" aria-label="Google Play"><svg class="play-icon-svg" viewBox="0 0 40 40" width="24" height="24"><path fill="none" d="M0,0h40v40H0V0z"/><g><path d="M19.7,19.2L4.3,35.3c0,0,0,0,0,0c0.5,1.7,2.1,3,4,3c0.8,0,1.5-0.2,2.1-0.6l0,0l17.4-9.9L19.7,19.2z" fill="#EA4335"/><path d="M35.3,16.4L35.3,16.4l-7.5-4.3l-8.4,7.4l8.5,8.3l7.5-4.2c1.3-0.7,2.2-2.1,2.2-3.6C37.5,18.5,36.6,17.1,35.3,16.4z" fill="#FBBC04"/><path d="M4.3,4.7C4.2,5,4.2,5.4,4.2,5.8v28.5c0,0.4,0,0.7,0.1,1.1l16-15.7L4.3,4.7z" fill="#4285F4"/><path d="M19.8,20l8-7.9L10.5,2.3C9.9,1.9,9.1,1.7,8.3,1.7c-1.9,0-3.6,1.3-4,3c0,0,0,0,0,0L19.8,20z" fill="#34A853"/></g></svg><span class="play-logo-text">Google Play</span></a><div class="header-actions"><button class="icon-btn">?</button></div></nav>';
 
-document.getElementById('saveBtn').addEventListener('click', async () => {
-  try {
-    const r = await fetch('/api/config?app=' + encodeURIComponent(currentSlug), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config),
+  // app hero
+  html += '<main><div class="app-hero">';
+  html += '<img class="app-icon-large editable" data-path="app.icon" src="' + esc(c.app.icon) + '" alt="Ícone">';
+  html += '<h1 class="app-title-h1 editable" data-path="app.title" contenteditable="false">' + esc(c.app.title) + '</h1>';
+  html += '<a class="app-developer-link editable" data-path="app.developer" href="#">' + esc(c.app.developer) + '</a>';
+  html += '<div class="app-badge editable" data-path="app.badge">' + esc(c.app.badge) + '</div></div>';
+
+  // rating
+  html += '<div class="rating-section"><div class="rating-number editable" data-path="app.rating">' + esc(c.app.rating) + '</div>';
+  html += '<div class="rating-row"><span>' + esc(c.app.reviews) + '</span></div>';
+  html += '<div class="rating-label">' + esc(c.app.downloads) + ' downloads</div></div>';
+
+  // install + actions
+  html += '<div class="install-btn-wrapper"><button class="btn-install">Instalar</button></div>';
+  html += '<div class="action-buttons"><button class="btn-circle">★</button></div>';
+
+  // screenshots
+  if (c.screenshots && c.screenshots.length) {
+    html += '<div class="screenshots-wrapper"><div class="screenshots-scroll">';
+    c.screenshots.forEach(function(s, i) {
+      html += '<span class="screenshot-wrap editable" data-path="screenshots.' + i + '"><img src="' + esc(s) + '" alt="Screenshot" loading="lazy" style="height:200px;border-radius:8px;border:1px solid rgba(0,0,0,.05)"><button class="remove-btn" data-idx="' + i + '" onclick="removeScreenshot(' + i + ');event.stopPropagation()">✕</button></span>';
     });
-    if (r.ok) {
-      statusEl.className = 'status success';
-      statusEl.textContent = 'Salvo com sucesso!';
-      setTimeout(() => { statusEl.className = 'status'; }, 3000);
-    } else throw new Error('Erro ao salvar');
-  } catch (e) {
-    statusEl.className = 'status error';
-    statusEl.textContent = 'Erro: ' + e.message;
+    html += '<button class="add-screenshot editable" onclick="addScreenshot()">+</button>';
+    html += '</div></div>';
+  }
+
+  // about
+  html += '<div class="section-header-row"><h2 class="section-heading editable" data-path="about.title">' + esc(c.about.title) + '</h2></div>';
+  html += '<div class="about-text">';
+  if (c.about.sections) {
+    c.about.sections.forEach(function(s, i) {
+      var cls = s.type === 'heading' ? 'about-section-heading' : s.type === 'subheading' ? 'about-section-subheading' : '';
+      html += '<div class="' + cls + ' editable" data-path="about.sections.' + i + '.content">' + esc(s.content) + '</div>';
+    });
+  }
+  html += '<div class="about-updated-label">Atualizado em</div><div class="about-date editable" data-path="app.updated">' + esc(c.app.updated) + '</div></div>';
+
+  // categories
+  if (c.categories && c.categories.length) {
+    html += '<div class="chips-wrapper">';
+    c.categories.forEach(function(cat, i) {
+      html += '<span class="chip editable" data-path="categories.' + i + '">' + esc(cat) + '</span>';
+    });
+    html += '</div>';
+  }
+
+  // data safety
+  html += '<div class="section-header-row"><h2 class="section-heading editable" data-path="dataSafety.title">' + esc(c.dataSafety.title) + '</h2></div>';
+  html += '<div class="safety-description editable" data-path="dataSafety.description">' + esc(c.dataSafety.description) + '</div>';
+  html += '</main>';
+
+  // footer with save hint
+  html += '<div style="padding:24px;text-align:center;color:#5f6368;font-size:12px;border-top:1px solid #e8eaed">Clique em qualquer elemento para editar • 💾 Salvar e Publicar para aplicar</div>';
+
+  return html;
+}
+
+/* ---- render ---- */
+function render() {
+  var app = document.getElementById('app');
+  app.innerHTML = buildPreview();
+  attachEditableListeners();
+}
+
+/* ---- editable click handlers ---- */
+function attachEditableListeners() {
+  document.querySelectorAll('.editable').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var path = this.dataset.path;
+      if (!path) return;
+      if (this.tagName === 'IMG') {
+        openImageEditor(path, this);
+      } else {
+        openTextEditor(path, this);
+      }
+    });
+  });
+}
+
+function hideAllPanels() {
+  document.getElementById('toolbar').classList.remove('show');
+  document.getElementById('uploader').classList.remove('show');
+  document.getElementById('textEditor').classList.remove('show');
+  document.getElementById('picker').classList.remove('show');
+  document.querySelectorAll('.editing').forEach(function(e) { e.classList.remove('editing'); });
+}
+
+function openTextEditor(path, el) {
+  hideAllPanels();
+  currentPath = path;
+  el.classList.add('editing');
+  var val = getVal(path);
+  var te = document.getElementById('textEditor');
+  te.innerHTML = '<textarea id="textArea" rows="3">' + esc(val) + '</textarea><button class="btn-apply-text" onclick="applyText()">Aplicar</button>';
+  te.classList.add('show');
+
+  var rect = el.getBoundingClientRect();
+  var wrapper = document.querySelector('.preview-wrapper').getBoundingClientRect();
+  var top = rect.top - wrapper.top + rect.height + 4;
+  if (top + 120 > wrapper.height) top = rect.top - wrapper.top - 120;
+  te.style.left = Math.max(4, rect.left - wrapper.left) + 'px';
+  te.style.top = Math.max(0, top) + 'px';
+
+  document.getElementById('textArea').focus();
+  document.getElementById('textArea').select();
+}
+
+function applyText() {
+  var val = document.getElementById('textArea').value;
+  if (currentPath) setVal(currentPath, val);
+  render();
+  showStatus('Texto atualizado! Clique em 💾 Salvar e Publicar para aplicar.', 'success');
+}
+
+function openImageEditor(path, imgEl) {
+  hideAllPanels();
+  currentPath = path;
+  imgEl.classList.add('editing');
+  var up = document.getElementById('uploader');
+  up.innerHTML = '<div class="drop-area" id="dropArea" onclick="document.getElementById(\'fileInput\').click()">Clique para selecionar imagem<br><small style="color:#9aa0a6">ou arraste aqui</small></div><input type="file" id="fileInput" accept="image/*" style="display:none" onchange="uploadFile(this.files[0])"><div class="preview-area" id="previewArea"></div><hr style="margin:8px 0;border:none;border-top:1px solid #dadce0"><label style="font-size:11px;color:#5f6368">Ou cole a URL:</label><input class="url-field" id="urlField" placeholder="https://..." value="' + esc(getVal(path)) + '"><button class="btn-apply" onclick="applyImageUrl()">Aplicar</button>';
+  up.classList.add('show');
+
+  var rect = imgEl.getBoundingClientRect();
+  var wrapper = document.querySelector('.preview-wrapper').getBoundingClientRect();
+  var top = rect.top - wrapper.top + rect.height + 4;
+  if (top + 200 > wrapper.height) top = rect.top - wrapper.top - 250;
+  up.style.left = Math.max(4, rect.left - wrapper.left) + 'px';
+  up.style.top = Math.max(0, top) + 'px';
+
+  // drag and drop
+  var da = document.getElementById('dropArea');
+  da.addEventListener('dragover', function(e) { e.preventDefault(); da.style.borderColor = '#01875f'; da.style.background = '#e6f4ea'; });
+  da.addEventListener('dragleave', function() { da.style.borderColor = '#dadce0'; da.style.background = ''; });
+  da.addEventListener('drop', function(e) {
+    e.preventDefault();
+    da.style.borderColor = '#dadce0'; da.style.background = '';
+    if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+  });
+}
+
+function applyImageUrl() {
+  var val = document.getElementById('urlField').value;
+  if (currentPath) setVal(currentPath, val);
+  render();
+  showStatus('Imagem atualizada!', 'success');
+}
+
+function uploadFile(file) {
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showStatus('Arquivo muito grande (max 10MB)', 'error'); return; }
+  document.getElementById('dropArea').innerHTML = 'Enviando...';
+  var fd = new FormData();
+  fd.append('image', file);
+  fetch('/api/upload', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      if (resp.url) {
+        var url = location.protocol + '//' + location.host + resp.url;
+        document.getElementById('urlField').value = url;
+        document.getElementById('previewArea').innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:80px;border-radius:4px">';
+        document.getElementById('dropArea').innerHTML = '✅ Enviado! Clique em "Aplicar" para usar.';
+        showStatus('Imagem enviada!', 'success');
+      } else {
+        showStatus('Erro: ' + (resp.error || ''), 'error');
+        document.getElementById('dropArea').innerHTML = 'Clique para selecionar imagem';
+      }
+    })
+    .catch(function(e) {
+      showStatus('Erro: ' + e.message, 'error');
+      document.getElementById('dropArea').innerHTML = 'Clique para selecionar imagem';
+    });
+}
+
+function addScreenshot() {
+  var sc = getVal('screenshots');
+  if (!Array.isArray(sc)) { setVal('screenshots', []); sc = []; }
+  sc.push('');
+  render();
+}
+
+function removeScreenshot(i) {
+  var sc = getVal('screenshots');
+  if (Array.isArray(sc)) { sc.splice(i, 1); render(); }
+}
+
+/* ---- save ---- */
+function saveAll() {
+  var btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  fetch('/api/save-config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(CONFIGS)
+  }).then(function(r) { return r.json(); }).then(function(resp) {
+    if (resp.ok) {
+      showStatus('✅ Salvo! As mudanças já estão no ar.', 'success');
+    } else {
+      showStatus('Erro: ' + (resp.error || ''), 'error');
+    }
+  }).catch(function(e) {
+    showStatus('Erro: ' + e.message, 'error');
+  }).then(function() {
+    btn.disabled = false; btn.textContent = '💾 Salvar e Publicar';
+  });
+}
+
+/* ---- close panels on outside click ---- */
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.editable') && !e.target.closest('.edit-toolbar') && !e.target.closest('.inline-upload') && !e.target.closest('.text-editor') && !e.target.closest('.picker')) {
+    hideAllPanels();
   }
 });
 
-init();
+/* ---- init ---- */
+(function init() {
+  var saved = localStorage.getItem('playstore_configs');
+  if (saved) { try { CONFIGS = JSON.parse(saved); } catch(e) {} }
+  if (!CONFIGS) {
+    fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
+      var m = html.match(/var CONFIGS = (\{[\s\S]*?\});\s*\n/);
+      if (m) { CONFIGS = JSON.parse(m[1]); render(); }
+    });
+    return;
+  }
+  render();
+})();
 </script>
 </body>
 </html>
