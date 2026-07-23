@@ -364,8 +364,8 @@ function footerHtml(c) {
 /* ---- hide top-header on scroll down ---- */
 (function() {
   var lastScroll = 0;
-  window.addEventListener('scroll', function() {
-    var st = window.pageYOffset || document.documentElement.scrollTop;
+  function onScroll() {
+    var st = window.pageYOffset || document.documentElement.scrollTop || document.getElementById('pageContainer').scrollTop || 0;
     var header = document.querySelector('.top-header');
     if (!header) return;
     if (st > lastScroll && st > 60) {
@@ -374,7 +374,11 @@ function footerHtml(c) {
       header.classList.remove('hidden');
     }
     lastScroll = st <= 0 ? 0 : st;
-  }, {passive: true});
+  }
+  window.addEventListener('scroll', onScroll, {passive: true});
+  document.addEventListener('scroll', onScroll, {passive: true, capture: true});
+  var pc = document.getElementById('pageContainer');
+  if (pc) pc.addEventListener('scroll', onScroll, {passive: true});
 })();
 
 </script>
