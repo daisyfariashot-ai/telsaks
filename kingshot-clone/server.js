@@ -1,6 +1,19 @@
 const express = require('express');
+const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+
+const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: UPLOAD_DIR,
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname) || '.png';
+    cb(null, Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext);
+  }
+});
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000');
@@ -17,6 +30,11 @@ function readConfigs() {
 function writeConfigs(data) {
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
+
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'no file' });
+  res.json({ url: '/uploads/' + req.file.filename });
+});
 
 app.post('/api/save-config', (req, res) => {
   try {

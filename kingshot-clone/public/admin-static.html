@@ -44,6 +44,10 @@ h3 { font-size: 14px; margin: 12px 0 6px; color: #5f6368; }
 .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
 .toolbar select { flex: 1; padding: 8px; font-size: 14px; border: 1px solid #dadce0; border-radius: 6px; min-width: 150px; }
 #previewLink { text-decoration: none; }
+.upload-box { border: 2px dashed #dadce0; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 12px; cursor: pointer; }
+.upload-box:hover { border-color: #01875f; background: #f0fdf8; }
+.upload-box.dragover { border-color: #01875f; background: #e6f4ea; }
+.upload-preview { max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -57,6 +61,19 @@ h3 { font-size: 14px; margin: 12px 0 6px; color: #5f6368; }
   </div>
   <div class="tab-bar" id="tabs"></div>
   <div id="forms"></div>
+  <details style="margin-top:12px;border:1px solid #e8eaed;border-radius:8px;padding:12px;background:#fff">
+    <summary style="cursor:pointer;font-weight:500;font-size:14px;color:#1a73e8">📤 Upload de Imagens</summary>
+    <div class="upload-box" id="dropZone">
+      <p style="color:#5f6368;margin:0;font-size:14px">Arraste uma imagem aqui ou clique para selecionar</p>
+      <input type="file" id="fileInput" accept="image/*" style="display:none">
+    </div>
+    <div id="uploadResult" style="display:none;text-align:center">
+      <p style="font-size:13px;color:#137333;margin:4px 0">✅ URL copiada:</p>
+      <input id="uploadedUrl" readonly style="width:100%;padding:8px;font-size:13px;border:1px solid #dadce0;border-radius:6px;text-align:center;cursor:pointer" onclick="this.select();document.execCommand('copy')">
+      <img id="uploadPreview" class="upload-preview" style="display:none">
+    </div>
+  </details>
+
   <button class="btn-save" id="saveBtn">Salvar no Navegador</button>
   <button class="btn-export" id="publishBtn">💾 Salvar e Publicar</button>
   <button class="btn-export" id="exportBtn" style="background:#5f6368">Exportar HTML (Download)</button>
@@ -467,6 +484,48 @@ document.getElementById('exportBtn').addEventListener('click', function() {
     showStatus('HTML exportado!', 'success');
   });
 });
+
+/* ---- image upload ---- */
+(function() {
+  var dz = document.getElementById('dropZone');
+  var fi = document.getElementById('fileInput');
+  var ur = document.getElementById('uploadResult');
+  var uu = document.getElementById('uploadedUrl');
+  var up = document.getElementById('uploadPreview');
+
+  dz.addEventListener('click', function() { fi.click(); });
+  dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
+  dz.addEventListener('drop', function(e) { e.preventDefault(); dz.classList.remove('dragover'); if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]); });
+  fi.addEventListener('change', function() { if (this.files.length) uploadFile(this.files[0]); });
+
+  function uploadFile(file) {
+    if (file.size > 10 * 1024 * 1024) { showStatus('Arquivo muito grande (max 10MB)', 'error'); return; }
+    dz.innerHTML = '<p style="color:#5f6368;margin:0">Enviando...</p>';
+    var fd = new FormData();
+    fd.append('image', file);
+    fetch('/api/upload', { method: 'POST', body: fd })
+      .then(function(r) { return r.json(); })
+      .then(function(resp) {
+        if (resp.url) {
+          ur.style.display = 'block';
+          uu.value = location.protocol + '//' + location.host + resp.url;
+          up.src = uu.value;
+          up.style.display = 'block';
+          showStatus('✅ Imagem enviada! URL copiada.', 'success');
+          uu.select(); document.execCommand('copy');
+          dz.innerHTML = '<p style="color:#5f6368;margin:0;font-size:14px">Arraste uma imagem aqui ou clique para selecionar</p>';
+        } else {
+          showStatus('Erro: ' + (resp.error || 'desconhecido'), 'error');
+          dz.innerHTML = '<p style="color:#5f6368;margin:0;font-size:14px">Arraste uma imagem aqui ou clique para selecionar</p>';
+        }
+      })
+      .catch(function(e) {
+        showStatus('Erro ao enviar: ' + e.message, 'error');
+        dz.innerHTML = '<p style="color:#5f6368;margin:0;font-size:14px">Arraste uma imagem aqui ou clique para selecionar</p>';
+      });
+  }
+})();
 
 init();
 </script>
