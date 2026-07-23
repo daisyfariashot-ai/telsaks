@@ -36,6 +36,11 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   res.json({ url: '/uploads/' + req.file.filename });
 });
 
+app.post('/api/upload-apk', upload.single('apk'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'no file' });
+  res.json({ url: '/uploads/' + req.file.filename });
+});
+
 function replaceConfigsInHTML(html, json) {
   const marker = 'var CONFIGS = ';
   const start = html.indexOf(marker);

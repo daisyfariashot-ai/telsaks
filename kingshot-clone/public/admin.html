@@ -140,7 +140,9 @@ function buildPreview() {
   html += '<div class="rating-label">' + esc(c.app.downloads) + ' downloads</div></div>';
 
   // install + actions
-  html += '<div class="install-btn-wrapper"><button class="btn-install">Instalar</button></div>';
+  var installUrl = esc(c.installUrl || '');
+  html += '<div class="install-btn-wrapper"><button class="btn-install editable" data-path="installUrl">' + (installUrl ? '&#x2B07; Baixar APK' : 'Instalar') + '</button></div>';
+  if (installUrl) html += '<div style="text-align:center;margin-top:4px"><small style="color:#01875f;font-size:11px">APK configurado: clique para alterar</small></div>';
   html += '<div class="action-buttons"><button class="btn-circle">★</button></div>';
 
   // screenshots
@@ -219,6 +221,10 @@ function openTextEditor(path, el) {
   hideAllPanels();
   currentPath = path;
   el.classList.add('editing');
+  if (path === 'installUrl') {
+    openApkEditor(path, el);
+    return;
+  }
   var val = getVal(path);
   var te = document.getElementById('textEditor');
   te.innerHTML = '<textarea id="textArea" rows="3">' + esc(val) + '</textarea><button class="btn-apply-text" onclick="applyText()">Aplicar</button>';
@@ -240,6 +246,56 @@ function applyText() {
   if (currentPath) setVal(currentPath, val);
   render();
   showStatus('Texto atualizado! Clique em 💾 Salvar e Publicar para aplicar.', 'success');
+}
+
+/* ---- APK editor ---- */
+function openApkEditor(path, el) {
+  var current = getVal(path) || '';
+  var up = document.getElementById('uploader');
+  up.innerHTML = '<div class="drop-area" id="dropArea" onclick="document.getElementById(\'apkInput\').click()" style="pointer-events:auto">' + (current ? 'APK atual: ' + current.split('/').pop() : 'Clique para enviar APK') + '<br><small style="color:#9aa0a6">ou arraste aqui (max 50MB)</small></div><input type="file" id="apkInput" accept=".apk,application/vnd.android.package-archive" style="display:none"><div id="apkStatus" style="text-align:center;margin-top:6px;font-size:12px;color:#137333;display:' + (current?'block':'none') + '">✅ APK configurado</div><hr style="margin:8px 0;border:none;border-top:1px solid #dadce0"><label style="font-size:11px;color:#5f6368">Ou cole a URL:</label><input class="url-field" id="urlField" placeholder="https://..." value="' + esc(current) + '"><button class="btn-apply" onclick="applyApkUrl()" style="margin-top:4px">Aplicar URL</button><button class="btn-remove" onclick="setVal(\'installUrl\',\'\');render();hideAllPanels();showStatus(\'APK removido!\',\'success\')" style="margin-top:4px;margin-left:4px">Remover APK</button>';
+  up.classList.add('show');
+  
+  var rect = el.getBoundingClientRect();
+  var wrapper = document.querySelector('.preview-wrapper').getBoundingClientRect();
+  up.style.left = Math.max(4, rect.left - wrapper.left) + 'px';
+  up.style.top = Math.max(0, rect.top - wrapper.top + rect.height + 4) + 'px';
+
+  document.getElementById('apkInput').addEventListener('change', function() { if (this.files.length) uploadApk(this.files[0]); });
+  var da = document.getElementById('dropArea');
+  da.addEventListener('dragover', function(e) { e.preventDefault(); da.style.borderColor = '#01875f'; da.style.background = '#e6f4ea'; });
+  da.addEventListener('dragleave', function() { da.style.borderColor = '#dadce0'; da.style.background = ''; });
+  da.addEventListener('drop', function(e) { e.preventDefault(); da.style.borderColor = '#dadce0'; da.style.background = ''; if (e.dataTransfer.files.length) uploadApk(e.dataTransfer.files[0]); });
+}
+
+function uploadApk(file) {
+  if (!file) return;
+  if (file.size > 50 * 1024 * 1024) { showStatus('Arquivo muito grande (max 50MB)', 'error'); return; }
+  document.getElementById('dropArea').innerHTML = 'Enviando APK...';
+  var fd = new FormData();
+  fd.append('apk', file);
+  fetch('/api/upload-apk', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      if (resp.url) {
+        var url = '/uploads/' + resp.url.split('/').pop();
+        setVal('installUrl', url);
+        document.getElementById('urlField').value = url;
+        document.getElementById('apkStatus').style.display = 'block';
+        document.getElementById('dropArea').innerHTML = '✅ APK enviado: ' + file.name;
+        render();
+        showStatus('APK enviado! Clique em 💾 Salvar e Publicar.', 'success');
+      } else { showStatus('Erro: ' + (resp.error||''), 'error'); }
+    }).catch(function(e) {
+      showStatus('Erro: ' + e.message, 'error');
+      document.getElementById('dropArea').innerHTML = 'Clique para enviar APK';
+    });
+}
+
+function applyApkUrl() {
+  var val = document.getElementById('urlField').value;
+  setVal('installUrl', val);
+  render();
+  showStatus('URL do APK aplicada!', 'success');
 }
 
 function openImageEditor(path, imgEl) {

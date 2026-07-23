@@ -99,7 +99,7 @@ var CONFIGS = {"kingshot":{"header":{"title":"Google Play"},"app":{"icon":"https
         <div class="rating-label">${esc(c.app.downloads)} downloads</div>
       </div>
       <div class="install-btn-wrapper">
-        <button class="btn-install">Instalar</button>
+        ${c.installUrl ? '<a href="' + esc(c.installUrl) + '" download class="btn-install" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#01875f"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Baixar APK</a>' : '<button class="btn-install">Instalar</button>'}
       </div>
       <div class="action-buttons">
         <button class="btn-circle" aria-label="Compartilhar">${shareIcon()}</button>
