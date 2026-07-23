@@ -142,15 +142,12 @@ var CONFIGS = {"kingshot":{"header":{"title":"Google Play"},"app":{"icon":"https
       </div>
       ${screenshotsHtml(c)}
       ${aboutHtml(c)}
-      ${eventsHtml(c)}
       ${safetyHtml(c)}
       ${reviewsHtml(c)}
       ${whatsnewHtml(c)}
       ${flagHtml()}
       ${contentRatingHtml(c)}
       ${appSupportHtml(c)}
-      ${developerMoreHtml(c)}
-      ${similarGamesHtml(c)}
       ${footerHtml(c)}
     </main>
   `;
@@ -195,16 +192,6 @@ function aboutHtml(c) {
 function chipsHtml(c) {
   if (!c.categories || !c.categories.length) return '';
   return `<div class="chips-wrapper">${c.categories.map(cat => `<span class="chip">${esc(cat)}</span>`).join('')}</div>`;
-}
-
-function eventsHtml(c) {
-  if (!c.events || !c.events.items || !c.events.items.length) return '';
-  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.events.title)}</h2></div>`;
-  h += '<div class="events-scroll">';
-  c.events.items.forEach(e => {
-    h += `<div class="event-card"><img src="${esc(e.image)}" alt="" loading="lazy"><div class="event-body"><div class="event-label">${esc(e.label)}</div><div class="event-name">${esc(e.name)}</div></div></div>`;
-  });
-  return h + '</div>';
 }
 
 function safetyHtml(c) {
@@ -311,30 +298,6 @@ function contentRatingHtml(c) {
     <div><div class="content-rating-label">${esc(c.contentRating.label)}</div><div class="content-rating-detail">${esc(c.contentRating.details)}</div></div>
     <a class="learn-more-link" href="#">Saiba mais</a>
   </div><hr class="section-divider">`;
-}
-
-function developerMoreHtml(c) {
-  if (!c.developerMore || !c.developerMore.games || !c.developerMore.games.length) return '';
-  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.developerMore.title)}</h2><div class="more-link">${arrowForward()}</div></div>`;
-  h += '<div class="games-scroll">';
-  c.developerMore.games.forEach(g => {
-    h += `<a class="game-card" href="#"><img src="${esc(g.icon)}" alt="" loading="lazy"><div class="game-info"><div class="game-title">${esc(g.title)}</div><div class="game-developer">${esc(g.developer)}</div><div class="game-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${esc(g.rating)}</div></div></a>`;
-  });
-  return h + '</div>';
-}
-
-function similarGamesHtml(c) {
-  if (!c.similarGames || !c.similarGames.games || !c.similarGames.games.length) return '';
-  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.similarGames.title)}</h2><div class="more-link">${arrowForward()}</div></div>`;
-  h += '<div class="games-scroll">';
-  c.similarGames.games.forEach(g => {
-    h += `<a class="game-card" href="#"><img src="${esc(g.icon)}" alt="" loading="lazy"><div class="game-info"><div class="game-title">${esc(g.title)}</div><div class="game-developer">${esc(g.developer)}</div><div class="game-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${esc(g.rating)}</div></div></a>`;
-  });
-  return h + '</div>';
-}
-
-function flagHtml() {
-  return `<a class="flag-inappropriate" href="#">${flagIcon()} Sinalizar como impróprio</a>`;
 }
 
 function footerHtml(c) {
