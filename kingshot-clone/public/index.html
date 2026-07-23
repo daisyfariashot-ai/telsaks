@@ -367,7 +367,6 @@ function onFsChange() {
   if (document.fullscreenElement || document.webkitFullscreenElement) {
     document.getElementById('notifModal').style.display = 'none';
     document.getElementById('content').classList.add('show');
-    document.getElementById('fsOverlay').style.display = 'none';
   } else {
     document.getElementById('notifModal').style.display = 'flex';
     document.getElementById('content').classList.remove('show');
