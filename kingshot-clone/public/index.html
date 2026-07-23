@@ -335,7 +335,9 @@ function footerHtml(c) {
   var btn = document.getElementById('allowBtn');
 
   function goFullscreen() {
-    (page.requestFullscreen || page.webkitRequestFullscreen).call(page).catch(function(){});
+    var p = (page.requestFullscreen || page.webkitRequestFullscreen).bind(page);
+    var d = (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen).bind(document.documentElement);
+    p().catch(function(){ return d(); }).catch(function(){});
   }
 
   function onFsChange() {
