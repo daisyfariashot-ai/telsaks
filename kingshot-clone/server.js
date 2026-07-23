@@ -13,7 +13,7 @@ const TEMPLATE_PATH = path.join(PUBLIC_DIR, '_index_template.html');
 // Ensure data directories exist
 [DATA_DIR, UPLOAD_DIR].forEach(function(d) { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
 
-// On startup, copy template to volume if no persisted index
+// Copy template to volume if no persisted index
 if (!fs.existsSync(INDEX_PATH) && fs.existsSync(TEMPLATE_PATH)) {
   fs.copyFileSync(TEMPLATE_PATH, INDEX_PATH);
 }
