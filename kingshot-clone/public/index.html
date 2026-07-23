@@ -13,8 +13,8 @@
 #pageContainer { background:#fff; }
 #pageContainer:fullscreen, #pageContainer:-webkit-full-screen { background:#fff; overflow:auto; }
 /* ---- fake url bar ---- */
-.url-bar { background:#1a1a2e; color:#e0e0e0; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:8px; font-family: 'Google Sans', Roboto, Arial, sans-serif; user-select:none; position:relative; z-index:1; }
-.url-bar .url-text { flex:1; background:#0d0d1a; border-radius:16px; padding:5px 14px; color:#b0b8c1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:11px; }
+.url-bar { background:#1a1a2e; color:#e0e0e0; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:8px; font-family: 'Google Sans', Roboto, Arial, sans-serif; user-select:none; position:sticky; top:0; z-index:100; }
+.url-bar .url-text { flex:1; background:#0d0d1a; border-radius:16px; padding:5px 14px; color:#b0b8c1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:11px; min-width:0; }
 .url-bar .lock { color:#4caf50; font-size:14px; flex-shrink:0; }
 /* ---- notification modal ---- */
 .modal-overlay { display:flex !important; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:99999; align-items:center; justify-content:center; }
