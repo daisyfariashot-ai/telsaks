@@ -41,17 +41,21 @@ function replaceConfigsInHTML(html, json) {
   const start = html.indexOf(marker);
   if (start === -1) throw new Error('CONFIGS marker not found');
   let pos = start + marker.length;
-  let braceCount = 0;
-  let started = false;
+  let braceCount = 0, started = false, inStr = false, esc = false;
   while (pos < html.length) {
-    if (html[pos] === '{') { braceCount++; started = true; }
-    else if (html[pos] === '}') { braceCount--; }
+    const ch = html[pos];
+    if (esc) { esc = false; pos++; continue; }
+    if (ch === '\\' && inStr) { esc = true; pos++; continue; }
+    if (ch === '"') { inStr = !inStr; pos++; continue; }
+    if (!inStr) {
+      if (ch === '{') { braceCount++; started = true; }
+      else if (ch === '}') { braceCount--; }
+    }
     pos++;
     if (started && braceCount === 0) break;
   }
-  // skip past optional ';'
   while (pos < html.length && html[pos] !== '\n') pos++;
-  if (html[pos] === '\n') pos++;
+  if (pos < html.length && html[pos] === '\n') pos++;
   return html.slice(0, start) + marker + json + ';\n' + html.slice(pos);
 }
 

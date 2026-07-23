@@ -435,15 +435,21 @@ function buildUpdatedHTML(json) {
     var start = html.indexOf(marker);
     if (start === -1) throw new Error('CONFIGS not found');
     var pos = start + marker.length;
-    var braceCount = 0, first = false;
+    var braceCount = 0, first = false, inStr = false, esc = false;
     while (pos < html.length) {
-      if (html[pos] === '{') { braceCount++; first = true; }
-      else if (html[pos] === '}') { braceCount--; }
+      var ch = html[pos];
+      if (esc) { esc = false; pos++; continue; }
+      if (ch === '\\' && inStr) { esc = true; pos++; continue; }
+      if (ch === '"') { inStr = !inStr; pos++; continue; }
+      if (!inStr) {
+        if (ch === '{') { braceCount++; first = true; }
+        else if (ch === '}') { braceCount--; }
+      }
       if (first && braceCount === 0) break;
       pos++;
     }
     while (pos < html.length && html[pos] !== '\n') pos++;
-    if (html[pos] === '\n') pos++;
+    if (pos < html.length && html[pos] === '\n') pos++;
     return html.slice(0, start) + marker + json + ';\n' + html.slice(pos);
   });
 }
