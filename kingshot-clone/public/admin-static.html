@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - Play Store</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { background: #f7f8fa; font-family: 'Google Sans', Roboto, Arial, sans-serif; margin: 0; padding: 16px; }
+.admin-body { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 22px; margin-bottom: 8px; }
+h2 { font-size: 16px; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #e8eaed; }
+h3 { font-size: 14px; margin: 12px 0 6px; color: #5f6368; }
+.section { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #e8eaed; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: #5f6368; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .3px; }
+.field input, .field textarea, .field select { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #dadce0; border-radius: 6px; font-family: inherit; box-sizing: border-box; }
+.field textarea { min-height: 60px; resize: vertical; }
+.field input:focus, .field textarea:focus { border-color: #01875f; outline: none; }
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; }
+.array-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 6px; border: 1px solid #e8eaed; }
+.array-item .row { margin-bottom: 4px; }
+.btn-add { background: #e8eaed; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; color: #1a1a1a; margin-top: 4px; }
+.btn-add:hover { background: #dadce0; }
+.btn-remove { background: #e8eaed; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; color: #c5221f; }
+.btn-remove:hover { background: #fce8e6; }
+.btn-save { background: #01875f; color: #fff; border: none; border-radius: 24px; padding: 12px 40px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; text-transform: uppercase; letter-spacing: .5px; margin-top: 16px; }
+.btn-save:hover { background: #016e4c; }
+.btn-export { background: #1a73e8; color: #fff; border: none; border-radius: 24px; padding: 12px 40px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; text-transform: uppercase; letter-spacing: .5px; margin-top: 8px; }
+.btn-export:hover { background: #1557b0; }
+.btn-preview { background: #fff; color: #01875f; border: 2px solid #01875f; border-radius: 24px; padding: 8px 24px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.status { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; display: none; }
+.status.success { background: #e6f4ea; color: #137333; display: block; }
+.status.error { background: #fce8e6; color: #c5221f; display: block; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.tab { padding: 8px 16px; font-size: 13px; border: none; background: #e8eaed; border-radius: 20px; cursor: pointer; font-weight: 500; color: #5f6368; }
+.tab.active { background: #01875f; color: #fff; }
+.about-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 6px; border: 1px solid #e8eaed; }
+.about-item select { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 4px; box-sizing: border-box; }
+.about-item textarea { width: 100%; min-height: 50px; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; resize: vertical; font-family: inherit; box-sizing: border-box; }
+.review-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 6px; border: 1px solid #e8eaed; }
+.game-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 6px; border: 1px solid #e8eaed; }
+.toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.toolbar select { flex: 1; padding: 8px; font-size: 14px; border: 1px solid #dadce0; border-radius: 6px; min-width: 150px; }
+#previewLink { text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="admin-body" id="admin">
+  <h1>Admin - Play Store</h1>
+  <p style="color:#5f6368;font-size:13px;margin-bottom:16px">Edite os dados e exporte o HTML atualizado para fazer deploy.</p>
+  <div class="status" id="status"></div>
+  <div class="toolbar">
+    <a id="previewLink" href="#" target="_blank"><button class="btn-preview">Abrir Preview</button></a>
+    <span style="color:#5f6368;font-size:13px">As alterações salvam automaticamente no navegador.</span>
+  </div>
+  <div class="tab-bar" id="tabs"></div>
+  <div id="forms"></div>
+  <button class="btn-save" id="saveBtn">Salvar no Navegador</button>
+  <button class="btn-export" id="exportBtn">Exportar HTML Completo (Download)</button>
+</div>
+<script>
+var CONFIGS = null;
+var activeSection = 0;
+var activeTab = 0;
+
+function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = '' + s; return d.innerHTML; }
+
+function loadFromStorage() {
+  var saved = localStorage.getItem('playstore_configs');
+  if (saved) {
+    try { CONFIGS = JSON.parse(saved); return true; } catch(e) {}
+  }
+  return false;
+}
+
+function loadFromIndex() {
+  // Try to fetch the embedded config from index.html
+  return fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
+    var m = html.match(/var CONFIGS = (\{[\s\S]*?\});\s*\n\/\* ---- main render/);
+    if (m) {
+      try { CONFIGS = JSON.parse(m[1]); return true; } catch(e) {}
+    }
+    return false;
+  });
+}
+
+function getConfig() {
+  if (!CONFIGS) CONFIGS = {};
+  var slug = 'kingshot';
+  if (!CONFIGS[slug]) CONFIGS[slug] = {};
+  return CONFIGS[slug];
+}
+
+function setVal(path, val) {
+  var parts = path.split('.');
+  var o = getConfig();
+  for (var i = 0; i < parts.length - 1; i++) {
+    if (!o[parts[i]]) o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  o[parts[parts.length - 1]] = val;
+}
+
+function getVal(path) {
+  var parts = path.split('.');
+  var o = getConfig();
+  for (var i = 0; i < parts.length; i++) {
+    if (o == null) return '';
+    o = o[parts[i]];
+  }
+  return o !== undefined && o !== null ? o : '';
+}
+
+function h(s) { return esc(s); }
+
+var sections = [
+  { id: 'app', label: 'App', tabs: [
+    { id: 'basic', label: 'Básico', fields: [
+      { key: 'app.icon', label: 'URL do Ícone', type: 'text' },
+      { key: 'app.title', label: 'Título do App', type: 'text' },
+      { key: 'app.developer', label: 'Desenvolvedor', type: 'text' },
+      { key: 'app.developerUrl', label: 'URL do Desenvolvedor', type: 'text' },
+      { key: 'app.badge', label: 'Badge (ex: Compras no app)', type: 'text' },
+      { key: 'app.rating', label: 'Nota (ex: 4,8)', type: 'text' },
+      { key: 'app.reviews', label: 'Avaliações (ex: 1,4 mi)', type: 'text' },
+      { key: 'app.downloads', label: 'Downloads (ex: 10 mi+)', type: 'text' },
+      { key: 'app.updated', label: 'Atualizado em', type: 'text' },
+    ]},
+    { id: 'screenshots', label: 'Screenshots', type: 'array', key: 'screenshots', placeholder: 'URL da imagem' },
+    { id: 'categories', label: 'Categorias', type: 'array', key: 'categories', placeholder: 'Nome da categoria' },
+  ]},
+  { id: 'about', label: 'Sobre', tabs: [
+    { id: 'about_main', label: 'Sobre', fields: [
+      { key: 'about.title', label: 'Título da seção', type: 'text' },
+    ]},
+    { id: 'about_sections', label: 'Seções', type: 'aboutSections' },
+  ]},
+  { id: 'reviews', label: 'Reviews', tabs: [
+    { id: 'rev_main', label: 'Geral', fields: [
+      { key: 'reviews.title', label: 'Título', type: 'text' },
+      { key: 'reviews.rating', label: 'Nota', type: 'text' },
+      { key: 'reviews.totalReviews', label: 'Total', type: 'text' },
+      { key: 'reviews.stars.5', label: 'Estrelas 5', type: 'text' },
+      { key: 'reviews.stars.4', label: 'Estrelas 4', type: 'text' },
+      { key: 'reviews.stars.3', label: 'Estrelas 3', type: 'text' },
+      { key: 'reviews.stars.2', label: 'Estrelas 2', type: 'text' },
+      { key: 'reviews.stars.1', label: 'Estrelas 1', type: 'text' },
+    ]},
+    { id: 'rev_items', label: 'Comentários', type: 'reviews' },
+  ]},
+  { id: 'safety', label: 'Segurança', tabs: [
+    { id: 'safety_main', label: 'Geral', fields: [
+      { key: 'dataSafety.title', label: 'Título', type: 'text' },
+      { key: 'dataSafety.description', label: 'Descrição', type: 'textarea' },
+    ]},
+    { id: 'safety_items', label: 'Itens', type: 'safetyItems' },
+  ]},
+  { id: 'extras', label: 'Extras', tabs: [
+    { id: 'whatsnew', label: 'Novidades', fields: [
+      { key: 'whatsNew.title', label: 'Título', type: 'text' },
+      { key: 'whatsNew.content', label: 'Conteúdo', type: 'textarea' },
+    ]},
+    { id: 'content', label: 'Classificação', fields: [
+      { key: 'contentRating.label', label: 'Label', type: 'text' },
+      { key: 'contentRating.details', label: 'Detalhes', type: 'text' },
+    ]},
+    { id: 'support', label: 'Suporte', fields: [
+      { key: 'appSupport.label', label: 'Label (ex: E-mail)', type: 'text' },
+      { key: 'appSupport.detail', label: 'Detalhe (ex: email@dev.com)', type: 'text' },
+    ]},
+    { id: 'events', label: 'Eventos', type: 'events' },
+    { id: 'devmore', label: 'Do Desenvolvedor', type: 'gameList', key: 'developerMore' },
+    { id: 'similar', label: 'Semelhantes', type: 'gameList', key: 'similarGames' },
+    { id: 'footer', label: 'Footer', type: 'footer' },
+  ]},
+];
+
+function renderTabs() {
+  var el = document.getElementById('tabs');
+  el.innerHTML = sections.map(function(s, i) {
+    return '<button class="tab' + (i === activeSection ? ' active' : '') + '" data-i="' + i + '">' + esc(s.label) + '</button>';
+  }).join('');
+  el.querySelectorAll('[data-i]').forEach(function(b) {
+    b.addEventListener('click', function() { activeSection = parseInt(this.dataset.i); activeTab = 0; renderTabs(); renderForms(); });
+  });
+  renderForms();
+}
+
+function renderForms() {
+  var container = document.getElementById('forms');
+  container.innerHTML = '';
+  var section = sections[activeSection];
+  var tabs = section.tabs;
+  if (tabs.length > 1) {
+    var bar = document.createElement('div'); bar.className = 'tab-bar';
+    bar.innerHTML = tabs.map(function(t, i) {
+      return '<button class="tab' + (i === activeTab ? ' active' : '') + '" data-t="' + i + '">' + esc(t.label) + '</button>';
+    }).join('');
+    bar.querySelectorAll('[data-t]').forEach(function(b) {
+      b.addEventListener('click', function() { activeTab = parseInt(this.dataset.t); renderForms(); });
+    });
+    container.appendChild(bar);
+  }
+  var tab = tabs[activeTab] || tabs[0];
+  var div = document.createElement('div'); div.className = 'section';
+  if (tab.type === 'array') renderArray(tab, div);
+  else if (tab.type === 'aboutSections') renderAboutSections(div);
+  else if (tab.type === 'reviews') renderReviews(div);
+  else if (tab.type === 'safetyItems') renderSafetyItems(div);
+  else if (tab.type === 'events') renderEvents(div);
+  else if (tab.type === 'gameList') renderGameList(tab, div);
+  else if (tab.type === 'footer') renderFooter(div);
+  else renderFields(tab.fields, div);
+  container.appendChild(div);
+}
+
+function renderFields(fields, container) {
+  fields.forEach(function(f) {
+    var d = document.createElement('div'); d.className = 'field';
+    var val = getVal(f.key);
+    var id = 'f_' + f.key.replace(/\./g, '_');
+    if (f.type === 'textarea') {
+      d.innerHTML = '<label for="' + id + '">' + esc(f.label) + '</label><textarea id="' + id + '" data-key="' + f.key + '">' + esc(val) + '</textarea>';
+    } else {
+      d.innerHTML = '<label for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" type="text" value="' + esc(val) + '" data-key="' + f.key + '">';
+    }
+    container.appendChild(d);
+    var inp = d.querySelector('[data-key]');
+    inp.addEventListener('input', function() { setVal(f.key, this.value); });
+  });
+}
+
+function renderArray(tab, container) {
+  var arr = getVal(tab.key);
+  if (!Array.isArray(arr)) { setVal(tab.key, []); arr = []; }
+  arr.forEach(function(item, i) {
+    var d = document.createElement('div'); d.className = 'array-item';
+    d.innerHTML = '<div class="row"><input type="text" value="' + esc(item) + '" data-i="' + i + '" placeholder="' + esc(tab.placeholder||'') + '"><button class="btn-remove" data-i="' + i + '">Remover</button></div>';
+    container.appendChild(d);
+    d.querySelector('input').addEventListener('input', function() { arr[this.dataset.i] = this.value; });
+    d.querySelector('.btn-remove').addEventListener('click', function() { arr.splice(parseInt(this.dataset.i), 1); renderForms(); });
+  });
+  var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar';
+  btn.addEventListener('click', function() { arr.push(''); renderForms(); });
+  container.appendChild(btn);
+}
+
+function renderAboutSections(container) {
+  var about = getVal('about');
+  if (!about || !about.sections) { setVal('about.sections', []); about = getVal('about'); }
+  about.sections.forEach(function(s, i) {
+    var d = document.createElement('div'); d.className = 'about-item';
+    d.innerHTML = '<select data-i="' + i + '"><option value="text"' + (s.type==='text'?' selected':'') + '>Texto</option><option value="heading"' + (s.type==='heading'?' selected':'') + '>Título</option><option value="subheading"' + (s.type==='subheading'?' selected':'') + '>Subtítulo</option></select><textarea data-i="' + i + '">' + esc(s.content) + '</textarea><button class="btn-remove" data-i="' + i + '">Remover</button>';
+    container.appendChild(d);
+    d.querySelector('select').addEventListener('change', function() { about.sections[this.dataset.i].type = this.value; });
+    d.querySelector('textarea').addEventListener('input', function() { about.sections[this.dataset.i].content = this.value; });
+    d.querySelector('.btn-remove').addEventListener('click', function() { about.sections.splice(parseInt(this.dataset.i), 1); renderForms(); });
+  });
+  var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar Seção';
+  btn.addEventListener('click', function() { about.sections.push({type:'text',content:''}); renderForms(); });
+  container.appendChild(btn);
+}
+
+function renderReviews(container) {
+  var rev = getVal('reviews');
+  if (!rev || !rev.items) { setVal('reviews.items', []); rev = getVal('reviews'); }
+  rev.items.forEach(function(r, i) {
+    var d = document.createElement('div'); d.className = 'review-item';
+    d.innerHTML = '<div class="row"><input value="' + esc(r.name) + '" placeholder="Nome" data-f="name" data-i="' + i + '"><input value="' + esc(r.date) + '" placeholder="Data" data-f="date" data-i="' + i + '"></div><div class="row"><input value="' + esc(r.text) + '" placeholder="Texto" data-f="text" data-i="' + i + '"><input value="' + r.stars + '" placeholder="Estrelas (1-5)" type="number" min="1" max="5" data-f="stars" data-i="' + i + '"></div><div class="row"><input value="' + r.helpful + '" placeholder="Úteis" type="number" data-f="helpful" data-i="' + i + '"><button class="btn-remove" data-i="' + i + '">Remover</button></div>';
+    container.appendChild(d);
+    d.querySelectorAll('[data-f]').forEach(function(el) {
+      el.addEventListener('input', function() { rev.items[this.dataset.i][this.dataset.f] = this.type === 'number' ? parseInt(this.value)||0 : this.value; });
+    });
+    d.querySelector('.btn-remove').addEventListener('click', function() { rev.items.splice(parseInt(this.dataset.i), 1); renderForms(); });
+  });
+  var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar Review';
+  btn.addEventListener('click', function() { rev.items.push({name:'',avatar:'',stars:5,date:'',text:'',helpful:0}); renderForms(); });
+  container.appendChild(btn);
+}
+
+function renderSafetyItems(container) {
+  var ds = getVal('dataSafety');
+  if (!ds || !ds.items) { setVal('dataSafety.items', []); ds = getVal('dataSafety'); }
+  ds.items.forEach(function(item, i) {
+    var d = document.createElement('div'); d.className = 'array-item';
+    d.innerHTML = '<div class="row"><select data-f="icon" data-i="' + i + '"><option value="share"' + (item.icon==='share'?' selected':'') + '>Compartilhar</option><option value="collect"' + (item.icon==='collect'?' selected':'') + '>Coletar</option><option value="encrypted"' + (item.icon==='encrypted'?' selected':'') + '>Criptografado</option><option value="nodelete"' + (item.icon==='nodelete'?' selected':'') + '>Não deletar</option></select><button class="btn-remove" data-i="' + i + '">Remover</button></div><div class="row"><input value="' + esc(item.label) + '" placeholder="Label" data-f="label" data-i="' + i + '"><input value="' + esc(item.detail||'') + '" placeholder="Detalhe" data-f="detail" data-i="' + i + '"></div>';
+    container.appendChild(d);
+    d.querySelectorAll('[data-f]').forEach(function(el) {
+      el.addEventListener('change', function() { ds.items[this.dataset.i][this.dataset.f] = this.value; });
+    });
+    d.querySelector('.btn-remove').addEventListener('click', function() { ds.items.splice(parseInt(this.dataset.i), 1); renderForms(); });
+  });
+  var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar Item';
+  btn.addEventListener('click', function() { ds.items.push({icon:'share',label:'',detail:''}); renderForms(); });
+  container.appendChild(btn);
+}
+
+function renderEvents(container) {
+  var ev = getVal('events');
+  if (!ev || !ev.items) { setVal('events.items', []); ev = getVal('events'); }
+  renderFields([{key:'events.title',label:'Título',type:'text'}], container);
+  ev.items.forEach(function(item, i) {
+    var d = document.createElement('div'); d.className = 'array-item';
+    d.innerHTML = '<div class="row"><input value="' + esc(item.image) + '" placeholder="URL da imagem" data-f="image" data-i="' + i + '"></div><div class="row"><input value="' + esc(item.label) + '" placeholder="Label" data-f="label" data-i="' + i + '"><input value="' + esc(item.name) + '" placeholder="Nome" data-f="name" data-i="' + i + '"><button class="btn-remove" data-i="' + i + '">Remover</button></div>';
+    container.appendChild(d);
+    d.querySelectorAll('[data-f]').forEach(function(el) {
+      el.addEventListener('input', function() { ev.items[this.dataset.i][this.dataset.f] = this.value; });
+    });
+    d.querySelector('.btn-remove').addEventListener('click', function() { ev.items.splice(parseInt(this.dataset.i), 1); renderForms(); });
+  });
+  var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar Evento';
+  btn.addEventListener('click', function() { ev.items.push({image:'',label:'',name:''}); renderForms(); });
+  container.appendChild(btn);
+}
+
+function renderGameList(tab, container) {
+  var data = getVal(tab.key);
+  if (!data) { setVal(tab.key, {title:'',games:[]}); data = getVal(tab.key); }
+  renderFields([{key:tab.key+'.title',label:'Título',type:'text'}], container);
+  var games = data.games || [];
+  games.forEach(function(g, i) {
+    var d = document.createElement('div'); d.className = 'game-item';
+    d.innerHTML = '<div class="row"><input value="' + esc(g.title) + '" placeholder="Título" data-f="title" data-i="' + i + '"><input value="' + esc(g.developer) + '" placeholder="Desenvolvedor" data-f="developer" data-i="' + i + '"></div><div class="row"><input value="' + esc(g.icon) + '" placeholder="URL do ícone" data-f="icon" data-i="' + i + '"><input value="' + esc(g.rating) + '" placeholder="Nota" data-f="rating" data-i="' + i + '"><button class="btn-remove" data-i="' + i + '">Remover</button></div>';
+    container.appendChild(d);
+    d.querySelectorAll('[data-f]').forEach(function(el) {
+      el.addEventListener('input', function() { games[this.dataset.i][this.dataset.f] = this.value; });
+    });
+    d.querySelector('.btn-remove').addEventListener('click', function() { games.splice(parseInt(this.dataset.i), 1); renderForms(); });
+  });
+  var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar Jogo';
+  btn.addEventListener('click', function() { games.push({icon:'',title:'',developer:'',rating:''}); renderForms(); });
+  container.appendChild(btn);
+}
+
+function renderFooter(container) {
+  var f = getVal('footer');
+  if (!f) { setVal('footer', {country:'',links:[],family:[],legal:[]}); f = getVal('footer'); }
+  renderFields([{key:'footer.country',label:'País',type:'text'}], container);
+  ['links','family','legal'].forEach(function(group) {
+    var h = document.createElement('h3'); h.textContent = {links:'Links',family:'Família',legal:'Legal'}[group]; container.appendChild(h);
+    var arr = f[group] || [];
+    arr.forEach(function(item, i) {
+      var d = document.createElement('div'); d.className = 'array-item';
+      d.innerHTML = '<div class="row"><input type="text" value="' + esc(item) + '" data-g="' + group + '" data-i="' + i + '"><button class="btn-remove" data-g="' + group + '" data-i="' + i + '">Remover</button></div>';
+      container.appendChild(d);
+      d.querySelector('input').addEventListener('input', function() { f[this.dataset.g][this.dataset.i] = this.value; });
+      d.querySelector('.btn-remove').addEventListener('click', function() { f[this.dataset.g].splice(parseInt(this.dataset.i), 1); renderForms(); });
+    });
+    var btn = document.createElement('button'); btn.className = 'btn-add'; btn.textContent = '+ Adicionar';
+    (function(g) { btn.addEventListener('click', function() { if (!f[g]) f[g] = []; f[g].push(''); renderForms(); }); })(group);
+    container.appendChild(btn);
+  });
+}
+
+function generateIndexHTML() {
+  var json = JSON.stringify(CONFIGS, null, 2);
+  // Build the original index.html but with new CONFIGS
+  return '<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">\n<title>Kingshot – Apps no Google Play</title>\n<link rel="stylesheet" href="style.css">\n<style>\n@font-face { font-family: \'Google Sans\'; font-style: normal; font-weight: 400; src: local(\'Segoe UI\'), local(\'Roboto\'); }\n@font-face { font-family: \'Google Sans\'; font-style: normal; font-weight: 500; src: local(\'Segoe UI Semibold\'), local(\'Roboto Medium\'); }\n@font-face { font-family: \'Google Sans Display\'; font-style: normal; font-weight: 400; src: local(\'Segoe UI\'), local(\'Roboto\'); }\n</style>\n</head>\n<body>\n<div id="app" class="loading">Carregando...</div>\n<script>\n/* ---- helpers (global so template functions access them) ---- */\n' + esc('function esc(s) { if (!s) return \'\'; var d = document.createElement(\'div\'); d.textContent = \'\' + s; return d.innerHTML; }') + '\nfunction helpIcon() { return \'<svg viewBox="0 0 24 24" width="24" height="24" fill="rgb(95,99,104)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>\'; }\nfunction accountIcon() { return \'<svg viewBox="0 0 24 24" width="24" height="24" fill="rgb(95,99,104)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>\'; }\nfunction searchIcon() { return \'<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>\'; }\nfunction shareIcon() { return \'<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>\'; }\nvar CONFIGS = ' + json + ';\n\n/* ---- main render ---- */\n(function() {\n  var appSlug = new URLSearchParams(location.search).get(\'app\') || \'kingshot\';\n  document.title = document.title.replace(\'Kingshot\', appSlug);\n  var c = CONFIGS[appSlug] || CONFIGS[\'kingshot\'];\n  var app = document.getElementById(\'app\');\n  app.className = \'\';\n  app.innerHTML = \'<!-- main content -->\';\n  // ... full render code would go here ...\n})();\n<\/script>\n</body>\n</html>';
+}
+
+function init() {
+  if (!loadFromStorage()) {
+    loadFromIndex().then(function(ok) {
+      if (!ok) {
+        CONFIGS = {"kingshot":{"header":{"title":"Google Play"},"app":{"icon":"","title":"Meu App","developer":"Dev","developerUrl":"#","badge":"Gratuito","rating":"4,5","reviews":"1 mi","downloads":"5 mi+","updated":"1 de jan. de 2025"},"screenshots":[],"categories":[],"about":{"title":"Sobre","sections":[]},"dataSafety":{"title":"Segurança","description":"","items":[]},"appSupport":{"label":"E-mail","detail":""},"reviews":{"title":"Avaliações","rating":"4,5","totalReviews":"1 mi","stars":{"1":"0","2":"0","3":"0","4":"0","5":"0"},"items":[]},"whatsNew":{"title":"Novidades","content":""},"contentRating":{"label":"Livre","details":""},"events":{"title":"Eventos","items":[]},"developerMore":{"title":"Mais","games":[]},"similarGames":{"title":"Semelhantes","games":[]},"footer":{"links":[],"family":[],"legal":[],"country":"Brasil"}}};
+      }
+      renderTabs();
+      document.getElementById('previewLink').href = 'index.html';
+      showStatus('Dados carregados' + (loadFromStorage() ? ' do navegador.' : ' do index.html.'), 'success');
+    });
+  } else {
+    renderTabs();
+    document.getElementById('previewLink').href = 'index.html';
+    showStatus('Dados carregados do navegador.', 'success');
+  }
+}
+
+function showStatus(msg, type) {
+  var el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  setTimeout(function() { el.className = 'status'; }, 3000);
+}
+
+document.getElementById('saveBtn').addEventListener('click', function() {
+  localStorage.setItem('playstore_configs', JSON.stringify(CONFIGS));
+  showStatus('Salvo no navegador! Lembre-se de exportar o HTML para fazer deploy.', 'success');
+});
+
+document.getElementById('exportBtn').addEventListener('click', function() {
+  localStorage.setItem('playstore_configs', JSON.stringify(CONFIGS));
+  var slug = 'kingshot';
+  var c = CONFIGS[slug];
+  var json = JSON.stringify(CONFIGS, null, 2);
+  // Fetch current index.html and replace the CONFIGS block
+  fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
+    var updated = html.replace(/var CONFIGS = \{[\s\S]*?\};\n/, 'var CONFIGS = ' + json + ';\n');
+    var blob = new Blob([updated], {type: 'text/html'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'index.html';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showStatus('HTML exportado! Faça commit do novo index.html no GitHub.', 'success');
+  });
+});
+
+init();
+</script>
+</body>
+</html>
