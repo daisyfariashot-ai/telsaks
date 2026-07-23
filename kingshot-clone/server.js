@@ -3,8 +3,21 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 
-const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+const PORT = parseInt(process.env.PORT || '3000');
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
+const INDEX_PATH = path.join(DATA_DIR, 'index.html');
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const CONFIG_PATH = path.join(__dirname, 'data', 'configs.json');
+
+// Ensure data directories exist
+[DATA_DIR, UPLOAD_DIR].forEach(function(d) { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
+
+// On startup, if no index.html in data dir, copy from built public dir
+const builtIndex = path.join(PUBLIC_DIR, 'index.html');
+if (!fs.existsSync(INDEX_PATH) && fs.existsSync(builtIndex)) {
+  fs.copyFileSync(builtIndex, INDEX_PATH);
+}
 
 const storage = multer.diskStorage({
   destination: UPLOAD_DIR,
@@ -13,15 +26,24 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext);
   }
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3000');
-const CONFIG_PATH = path.join(__dirname, 'data', 'configs.json');
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '..'))); // serve root files
-app.use('/kingshot-clone/public', express.static(path.join(__dirname, 'public')));
+app.use('/kingshot-clone/public', express.static(PUBLIC_DIR)); // serve built admin etc.
+
+// Custom route for index.html: serve from data dir (persisted)
+app.get('/kingshot-clone/public/index.html', function(req, res) {
+  if (fs.existsSync(INDEX_PATH)) {
+    res.sendFile(INDEX_PATH);
+  } else {
+    res.sendFile(builtIndex);
+  }
+});
+
+// Serve uploads from data dir
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 function readConfigs() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
@@ -67,11 +89,10 @@ function replaceConfigsInHTML(html, json) {
 app.post('/api/save-config', (req, res) => {
   try {
     const configs = req.body;
-    const indexPath = path.join(__dirname, 'public', 'index.html');
-    let html = fs.readFileSync(indexPath, 'utf-8');
+    let html = fs.readFileSync(builtIndex, 'utf-8');
     const json = JSON.stringify(configs, null, 2);
     const updated = replaceConfigsInHTML(html, json);
-    fs.writeFileSync(indexPath, updated, 'utf-8');
+    fs.writeFileSync(INDEX_PATH, updated, 'utf-8');
     writeConfigs(configs);
     res.json({ ok: true });
   } catch (e) {
