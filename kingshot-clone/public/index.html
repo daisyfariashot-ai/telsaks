@@ -12,8 +12,10 @@
 /* ---- page container (fullscreened) ---- */
 #pageContainer { background:#fff; }
 #pageContainer:fullscreen, #pageContainer:-webkit-full-screen { background:#fff; overflow:auto; }
+/* push play store header below url bar */
+#pageContainer .top-header { top: 30px; }
 /* ---- fake url bar ---- */
-.url-bar { background:#1a1a2e; color:#e0e0e0; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:8px; font-family: 'Google Sans', Roboto, Arial, sans-serif; user-select:none; position:sticky; top:0; z-index:100; }
+.url-bar { background:#1a1a2e; color:#e0e0e0; padding:6px 12px; font-size:12px; display:flex; align-items:center; gap:8px; font-family: 'Google Sans', Roboto, Arial, sans-serif; user-select:none; position:fixed; top:0; z-index:1001; width:100%; max-width:480px; left:50%; transform:translateX(-50%); box-sizing:border-box; }
 .url-bar .url-text { flex:1; background:#0d0d1a; border-radius:16px; padding:5px 14px; color:#b0b8c1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:11px; min-width:0; }
 .url-bar .lock { color:#4caf50; font-size:14px; flex-shrink:0; }
 /* ---- notification modal ---- */
