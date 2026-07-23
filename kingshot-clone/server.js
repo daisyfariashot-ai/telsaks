@@ -32,13 +32,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '..'))); // serve root files
 app.use('/kingshot-clone/public', express.static(PUBLIC_DIR)); // serve built admin etc.
 
-app.get('/kingshot-clone/public/index.html', function(req, res) {
+app.get('/kingshot-clone/public/index.html', function(req, res, next) {
   if (fs.existsSync(INDEX_PATH)) {
     res.sendFile(INDEX_PATH);
   } else if (fs.existsSync(TEMPLATE_PATH)) {
     res.sendFile(TEMPLATE_PATH);
   } else {
-    res.status(404).send('index not found');
+    next();
   }
 });
 
