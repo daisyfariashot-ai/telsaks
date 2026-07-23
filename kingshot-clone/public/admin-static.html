@@ -58,7 +58,13 @@ h3 { font-size: 14px; margin: 12px 0 6px; color: #5f6368; }
   <div class="tab-bar" id="tabs"></div>
   <div id="forms"></div>
   <button class="btn-save" id="saveBtn">Salvar no Navegador</button>
-  <button class="btn-export" id="exportBtn">Exportar HTML Completo (Download)</button>
+  <button class="btn-export" id="publishBtn">💾 Salvar e Publicar (GitHub)</button>
+  <button class="btn-export" id="exportBtn" style="background:#5f6368">Exportar HTML (Download)</button>
+  <div style="margin-top:12px;font-size:12px;color:#5f6368;display:flex;gap:8px;align-items:center">
+    <span>Token GitHub:</span>
+    <input id="ghToken" type="password" style="flex:1;padding:6px;border:1px solid #dadce0;border-radius:4px;font-size:13px" placeholder="github_pat_...">
+    <button id="saveTokenBtn" style="padding:6px 12px;border:none;background:#e8eaed;border-radius:4px;cursor:pointer">Salvar</button>
+  </div>
 </div>
 <script>
 var CONFIGS = null;
@@ -377,16 +383,87 @@ function init() {
   }
 }
 
+var GH_OWNER = 'daisyfariashot-ai';
+var GH_REPO = 'telsaks';
+var GH_BRANCH = 'main';
+var COOLIFY_TOKEN = '8|hft0HDccNtzvibAR7zKMQcCuwGproilcyb52iPMLce881732';
+var COOLIFY_URL = 'http://187.124.112.164:8000';
+
 function showStatus(msg, type) {
   var el = document.getElementById('status');
   el.className = 'status ' + type;
   el.textContent = msg;
-  setTimeout(function() { el.className = 'status'; }, 3000);
+  if (type === 'success') setTimeout(function() { el.className = 'status'; }, 5000);
+  else setTimeout(function() { el.className = 'status'; }, 8000);
 }
+
+function getToken() { return localStorage.getItem('gh_token') || ''; }
+
+document.getElementById('saveTokenBtn').addEventListener('click', function() {
+  localStorage.setItem('gh_token', document.getElementById('ghToken').value);
+  showStatus('Token salvo no navegador.', 'success');
+});
+
+// Load saved token
+var savedToken = getToken();
+if (savedToken) document.getElementById('ghToken').value = savedToken;
 
 document.getElementById('saveBtn').addEventListener('click', function() {
   localStorage.setItem('playstore_configs', JSON.stringify(CONFIGS));
-  showStatus('Salvo no navegador! Lembre-se de exportar o HTML para fazer deploy.', 'success');
+  showStatus('Salvo no navegador!', 'success');
+});
+
+function buildUpdatedHTML(json) {
+  return fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
+    return html.replace(/var CONFIGS = \{[\s\S]*?\};\n/, 'var CONFIGS = ' + json + ';\n');
+  });
+}
+
+function ghApi(path, method, body) {
+  var token = getToken();
+  if (!token) { showStatus('Token GitHub não configurado!', 'error'); throw new Error('no token'); }
+  var opts = { method: method || 'GET', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' } };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  return fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + path, opts).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e.message); });
+    return r.status === 204 ? null : r.json();
+  });
+}
+
+document.getElementById('publishBtn').addEventListener('click', function() {
+  this.disabled = true; this.textContent = 'Publicando...';
+  showStatus('Iniciando publicação...', 'success');
+  localStorage.setItem('playstore_configs', JSON.stringify(CONFIGS));
+  var json = JSON.stringify(CONFIGS, null, 2);
+
+  buildUpdatedHTML(json).then(function(updatedHtml) {
+    var content = btoa(unescape(encodeURIComponent(updatedHtml)));
+    // Get current file SHA first
+    return ghApi('/contents/kingshot-clone/public/index.html?ref=' + GH_BRANCH).then(function(resp) {
+      var sha = resp.sha;
+      return ghApi('/contents/kingshot-clone/public/index.html', 'PUT', {
+        message: 'feat: update play store config via admin',
+        content: content,
+        sha: sha,
+        branch: GH_BRANCH
+      });
+    });
+  }).then(function() {
+    showStatus('✅ Publicado no GitHub! Redeploy automático acionado...', 'success');
+    // Trigger Coolify redeploy
+    return fetch(COOLIFY_URL + '/api/v1/deploy?uuid=kqy12noujzwacb5ukf6a634r', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + COOLIFY_TOKEN, 'Content-Type': 'application/json' }
+    });
+  }).then(function() {
+    showStatus('✅ Publicado e redeploy acionado!', 'success');
+    document.getElementById('publishBtn').disabled = false;
+    document.getElementById('publishBtn').textContent = '💾 Salvar e Publicar (GitHub)';
+  }).catch(function(e) {
+    showStatus('Erro: ' + e.message, 'error');
+    document.getElementById('publishBtn').disabled = false;
+    document.getElementById('publishBtn').textContent = '💾 Salvar e Publicar (GitHub)';
+  });
 });
 
 document.getElementById('exportBtn').addEventListener('click', function() {
@@ -394,9 +471,7 @@ document.getElementById('exportBtn').addEventListener('click', function() {
   var slug = 'kingshot';
   var c = CONFIGS[slug];
   var json = JSON.stringify(CONFIGS, null, 2);
-  // Fetch current index.html and replace the CONFIGS block
-  fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
-    var updated = html.replace(/var CONFIGS = \{[\s\S]*?\};\n/, 'var CONFIGS = ' + json + ';\n');
+  buildUpdatedHTML(json).then(function(updated) {
     var blob = new Blob([updated], {type: 'text/html'});
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -404,7 +479,7 @@ document.getElementById('exportBtn').addEventListener('click', function() {
     document.body.appendChild(a); a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showStatus('HTML exportado! Faça commit do novo index.html no GitHub.', 'success');
+    showStatus('HTML exportado!', 'success');
   });
 });
 
