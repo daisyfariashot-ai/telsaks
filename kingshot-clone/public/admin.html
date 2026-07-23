@@ -317,6 +317,7 @@ function removeScreenshot(i) {
 function saveAll() {
   var btn = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = 'Salvando...';
+  localStorage.setItem('playstore_configs', JSON.stringify(CONFIGS));
   fetch('/api/save-config', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(CONFIGS)
   }).then(function(r) { return r.json(); }).then(function(resp) {
