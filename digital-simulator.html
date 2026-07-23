@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Digital - Reconhecimento Biométrico</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #000;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.container { text-align: center; padding: 1rem; }
+.mode-badge {
+  display: inline-block;
+  font-size: .7rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: .25rem .75rem;
+  border-radius: 999px;
+  margin-bottom: .75rem;
+  transition: opacity .3s;
+  min-height: 24px;
+}
+.mode-badge.real {
+  background: rgba(52,199,89,.15);
+  color: #34c759;
+  border: 1px solid rgba(52,199,89,.25);
+}
+.mode-badge.demo {
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.5);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.mode-badge.loading {
+  background: transparent;
+  border-color: transparent;
+  color: rgba(255,255,255,.3);
+}
+.scanner-area {
+  position: relative;
+  width: min(240px, 70vw);
+  aspect-ratio: 1;
+  margin: 1rem auto 2rem;
+  border: 2px solid rgba(255,255,255,.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color .4s;
+  outline: none;
+}
+.scanner-area:focus-visible {
+  outline: 2px solid #ffcc00;
+  outline-offset: 4px;
+}
+.scanner-area.idle {
+  cursor: pointer;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.08); }
+  50% { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+}
+.scanner-area.active { border-color: #ffcc00; }
+.scanner-area.success { border-color: #34c759; }
+.scanner-area.fail { border-color: #ff3b30; }
+.fingerprint {
+  width: 55%;
+  aspect-ratio: 1;
+  opacity: .35;
+  filter: invert(1);
+  transition: opacity .3s;
+}
+.scanner-area.active .fingerprint { opacity: .6; }
+.scanner-area.success .fingerprint { opacity: 1; }
+.scan-line {
+  position: absolute;
+  left: 4%;
+  width: 92%;
+  height: 2px;
+  background: linear-gradient(90deg,transparent,#ffcc00,transparent);
+  box-shadow: 0 0 14px #ffcc00;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.scanner-area.active .scan-line {
+  opacity: 1;
+  animation: sweep 1.4s ease-in-out infinite;
+}
+@keyframes sweep {
+  0% { top: 5%; }
+  50% { top: 92%; }
+  100% { top: 5%; }
+}
+.status { min-height: 4rem; }
+.status h2 {
+  font-weight: 400;
+  font-size: clamp(1rem, 4vw, 1.25rem);
+  transition: opacity .3s;
+}
+.small-hint {
+  font-size: .75rem;
+  color: rgba(255,255,255,.35);
+  margin-top: .35rem;
+  min-height: 1.2em;
+}
+.loader {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: #ffcc00;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 1rem auto 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.checkmark {
+  font-size: 3rem; line-height: 1;
+  animation: pop .3s cubic-bezier(.34,1.56,.64,1);
+  margin-top: .5rem;
+}
+@keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.btn {
+  margin-top: 1.5rem;
+  padding: .75rem 2rem;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .2s, opacity .2s;
+  min-height: 44px;
+}
+.btn:hover { background: rgba(255,255,255,.12); }
+.btn:active { transform: scale(.97); }
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="mode-badge loading" id="modeBadge">Verificando sensor...</div>
+  <div class="scanner-area idle" id="scanner" role="button" tabindex="0"
+       aria-label="Sensor de digital. Pressione Enter ou clique para iniciar">
+    <img class="fingerprint" src="https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/regular/fingerprint.svg" alt="" aria-hidden="true">
+    <div class="scan-line" aria-hidden="true"></div>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite">
+    <h2 id="title">Toque no sensor para iniciar</h2>
+    <p class="small-hint" id="hint"></p>
+  </div>
+  <button class="btn hidden" id="actionBtn" disabled>Reiniciar</button>
+</div>
+<script>
+  const scanner = document.getElementById("scanner");
+  const title = document.getElementById("title");
+  const hint = document.getElementById("hint");
+  const btn = document.getElementById("actionBtn");
+  const statusDiv = document.getElementById("status");
+  const badge = document.getElementById("modeBadge");
+  let scanning = false;
+  let canUseRealBiometric = false;
+  let webauthnAbort = null;
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function checkBiometric() {
+    const hasCred = !!navigator.credentials;
+    const hasWebAuthn = typeof PublicKeyCredential !== "undefined";
+    const secureContext = window.isSecureContext;
+
+    if (!hasCred || !hasWebAuthn) {
+      setBadge("demo", "Modo demonstra\u00E7\u00E3o");
+      return;
+    }
+
+    try {
+      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      canUseRealBiometric = available && secureContext;
+
+      if (canUseRealBiometric) {
+        setBadge("real", "Biometria real dispon\u00EDvel");
+        hint.textContent = "Seu dispositivo ser\u00E1 acionado";
+      } else if (available) {
+        setBadge("demo", "HTTPS necess\u00E1rio (demo)");
+        hint.textContent = "Sirva em HTTPS para usar a digital real";
+      } else {
+        setBadge("demo", "Modo demonstra\u00E7\u00E3o");
+      }
+    } catch(e) {
+      setBadge("demo", "Modo demonstra\u00E7\u00E3o");
+    }
+  }
+
+  function setBadge(type, text) {
+    badge.className = "mode-badge " + type;
+    badge.textContent = text;
+  }
+
+  async function triggerBiometric() {
+    if (!navigator.credentials) return false;
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const userId = crypto.getRandomValues(new Uint8Array(16));
+    try {
+      await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: "Demo Biometria" },
+          user: { id: userId, name: "demo@local", displayName: "Demo" },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+          timeout: 30000,
+          attestation: "none",
+        },
+        signal: webauthnAbort?.signal,
+      });
+      return true;
+    } catch(e) {
+      if (e.name === "AbortError") return null;
+      if (e.name === "NotAllowedError") return false;
+      if (e.name === "SecurityError") return false;
+      throw e;
+    }
+  }
+
+  function randomSuccess() { return Math.random() < 0.7; }
+
+  async function startScan() {
+    if (scanning) return;
+    scanning = true;
+    scanner.className = "scanner-area active";
+    scanner.setAttribute("aria-label", "Escaneando digital...");
+
+    if (canUseRealBiometric) {
+      title.textContent = "Aguardando digital no dispositivo...";
+      hint.textContent = "Use o leitor biom\u00E9trico do seu aparelho";
+    } else {
+      title.textContent = "Leitura da digital...";
+    }
+    btn.classList.add("hidden");
+    btn.disabled = true;
+    showLoader();
+
+    let success;
+    if (canUseRealBiometric) {
+      webauthnAbort = new AbortController();
+      try { success = await triggerBiometric(); }
+      catch(e) { success = false; }
+      webauthnAbort = null;
+      if (success === null) success = false;
+    } else {
+      await sleep(2500 + Math.random() * 1500);
+      success = randomSuccess();
+    }
+
+    clearExtras();
+    scanning = false;
+    if (success) {
+      scanner.className = "scanner-area success";
+      title.textContent = "Digital confirmada";
+      hint.textContent = "";
+      showCheckmark();
+      scanner.setAttribute("aria-label", "Digital confirmada com sucesso");
+    } else {
+      scanner.className = "scanner-area fail";
+      title.textContent = "Falha no reconhecimento";
+      hint.textContent = canUseRealBiometric ? "Tente novamente" : "";
+      scanner.setAttribute("aria-label", "Falha no reconhecimento da digital");
+    }
+    btn.textContent = "Reiniciar";
+    btn.classList.remove("hidden");
+    btn.disabled = false;
+  }
+
+  function reset() {
+    scanning = false;
+    if (webauthnAbort) { webauthnAbort.abort(); webauthnAbort = null; }
+    scanner.className = "scanner-area idle";
+    title.textContent = "Toque no sensor para iniciar";
+    scanner.setAttribute("aria-label", "Sensor de digital. Pressione Enter ou clique para iniciar");
+    if (canUseRealBiometric) {
+      hint.textContent = "Seu dispositivo ser\u00E1 acionado";
+    } else {
+      hint.textContent = "";
+    }
+    clearExtras();
+    btn.classList.add("hidden");
+    btn.disabled = true;
+  }
+
+  scanner.addEventListener("click", startScan);
+  scanner.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); startScan(); }
+  });
+  btn.addEventListener("click", reset);
+
+  function showLoader() {
+    const el = document.createElement("div");
+    el.className = "loader";
+    el.setAttribute("aria-label", "Carregando");
+    statusDiv.appendChild(el);
+  }
+  function showCheckmark() {
+    const el = document.createElement("div");
+    el.className = "checkmark";
+    el.innerHTML = "&#10003;";
+    el.style.color = "#34c759";
+    el.setAttribute("aria-hidden", "true");
+    statusDiv.appendChild(el);
+  }
+  function clearExtras() {
+    statusDiv.querySelectorAll(".loader, .checkmark").forEach(el => el.remove());
+  }
+
+  // block interaction until biometric probe finishes
+  scanner.style.pointerEvents = "none";
+  checkBiometric().finally(() => { scanner.style.pointerEvents = ""; });
+</script>
+</body>
+</html>

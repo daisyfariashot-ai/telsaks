@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Kingshot – Apps no Google Play</title>
+<link rel="stylesheet" href="style.css">
+<style>
+@font-face { font-family: 'Google Sans'; font-style: normal; font-weight: 400; src: local('Segoe UI'), local('Roboto'); }
+@font-face { font-family: 'Google Sans'; font-style: normal; font-weight: 500; src: local('Segoe UI Semibold'), local('Roboto Medium'); }
+@font-face { font-family: 'Google Sans Display'; font-style: normal; font-weight: 400; src: local('Segoe UI'), local('Roboto'); }
+</style>
+</head>
+<body>
+<div id="app" class="loading">Carregando...</div>
+<script>
+/* ---- helpers (global so template functions access them) ---- */
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = '' + s;
+  return d.innerHTML;
+}
+function helpIcon() {
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="rgb(95,99,104)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>';
+}
+function accountIcon() {
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="rgb(95,99,104)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
+}
+function gamepadIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="rgb(95,99,104)"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>';
+}
+function appsIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="rgb(1,135,95)"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>';
+}
+function booksIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="rgb(95,99,104)"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>';
+}
+function familyIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="rgb(95,99,104)"><path d="M12 12c0-3 2.5-5.5 5.5-5.5S23 9 23 12H12zm0 0c0 3-2.5 5.5-5.5 5.5S1 15 1 12h11zm0-7c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3z"/></svg>';
+}
+function searchIcon() {
+  return '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+}
+function shareIcon() {
+  return '<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>';
+}
+function wishlistIcon() {
+  return '<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>';
+}
+function flagIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>';
+}
+function arrowForward() {
+  return '<svg viewBox="0 0 24 24" width="20" height="20" fill="rgb(1,135,95)"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+}
+
+/* ---- main render ---- */
+(async function() {
+  const appSlug = new URLSearchParams(location.search).get('app') || 'kingshot';
+  document.title = document.title.replace('Kingshot', appSlug);
+  const res = await fetch('/api/config?app=' + encodeURIComponent(appSlug));
+  const c = await res.json();
+  const app = document.getElementById('app');
+  app.className = '';
+  app.innerHTML = `
+    <nav class="top-header" aria-label="Cabeçalho da página">
+      <a class="play-logo-link" href="/store/games" aria-label="Logotipo do Google Play">
+        <svg class="play-icon-svg" aria-hidden="true" viewBox="0 0 40 40" width="24" height="24"><path fill="none" d="M0,0h40v40H0V0z"/><g><path d="M19.7,19.2L4.3,35.3c0,0,0,0,0,0c0.5,1.7,2.1,3,4,3c0.8,0,1.5-0.2,2.1-0.6l0,0l17.4-9.9L19.7,19.2z" fill="#EA4335"/><path d="M35.3,16.4L35.3,16.4l-7.5-4.3l-8.4,7.4l8.5,8.3l7.5-4.2c1.3-0.7,2.2-2.1,2.2-3.6C37.5,18.5,36.6,17.1,35.3,16.4z" fill="#FBBC04"/><path d="M4.3,4.7C4.2,5,4.2,5.4,4.2,5.8v28.5c0,0.4,0,0.7,0.1,1.1l16-15.7L4.3,4.7z" fill="#4285F4"/><path d="M19.8,20l8-7.9L10.5,2.3C9.9,1.9,9.1,1.7,8.3,1.7c-1.9,0-3.6,1.3-4,3c0,0,0,0,0,0L19.8,20z" fill="#34A853"/></g></svg>
+        <span aria-hidden="true" class="play-logo-text">Google Play</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="Pesquisar">${searchIcon()}</button>
+        <button class="icon-btn" aria-label="Central de Ajuda">${helpIcon()}</button>
+        <button class="icon-btn" aria-label="Abrir o menu de contas">${accountIcon()}</button>
+      </div>
+      <nav class="bottom-nav" aria-label="Principal">
+        <button class="nav-tab">${gamepadIcon()} Jogos</button>
+        <button class="nav-tab active">${appsIcon()} Apps</button>
+        <button class="nav-tab">${booksIcon()} Livros</button>
+        <button class="nav-tab">${familyIcon()} Crianças</button>
+      </nav>
+    </nav>
+    <main>
+      <div class="app-hero">
+        <img class="app-icon-large" src="${esc(c.app.icon)}" alt="${esc(c.app.title)}">
+        <h1 class="app-title-h1">${esc(c.app.title)}</h1>
+        <a class="app-developer-link" href="${esc(c.app.developerUrl)}">${esc(c.app.developer)}</a>
+        <div class="app-badge">${esc(c.app.badge)}</div>
+      </div>
+      <div class="rating-section">
+        <div class="rating-number">${esc(c.app.rating)}</div>
+        <div class="rating-row">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="rgb(32,33,36)"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <span class="rating-reviews">${esc(c.app.reviews)}</span>
+        </div>
+        <div class="rating-label">${esc(c.app.downloads)} downloads</div>
+      </div>
+      <div class="install-btn-wrapper">
+        <button class="btn-install">Instalar</button>
+      </div>
+      <div class="action-buttons">
+        <button class="btn-circle" aria-label="Compartilhar">${shareIcon()}</button>
+        <button class="btn-circle" aria-label="Adicionar à lista de desejos">${wishlistIcon()}</button>
+      </div>
+      ${screenshotsHtml(c)}
+      ${aboutHtml(c)}
+      ${eventsHtml(c)}
+      ${safetyHtml(c)}
+      ${reviewsHtml(c)}
+      ${whatsnewHtml(c)}
+      ${flagHtml()}
+      ${contentRatingHtml(c)}
+      ${appSupportHtml(c)}
+      ${developerMoreHtml(c)}
+      ${similarGamesHtml(c)}
+      ${footerHtml(c)}
+    </main>
+  `;
+})();
+
+function screenshotsHtml(c) {
+  if (!c.screenshots || !c.screenshots.length) return '';
+  return `<div class="screenshots-wrapper"><div class="screenshots-scroll">${c.screenshots.map(s => `<img src="${s}" alt="Captura de tela" loading="lazy">`).join('')}</div></div>`;
+}
+
+function phoneIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>';
+}
+function laptopIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>';
+}
+function tabletIcon() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.5 0h-14C3.12 0 2 1.12 2 2.5v19C2 22.88 3.12 24 4.5 24h14c1.38 0 2.5-1.12 2.5-2.5v-19C21 1.12 19.88 0 18.5 0zm-7 23c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm7.5-4H4V3h15v16z"/></svg>';
+}
+function deviceTabsHtml() {
+  return `<div class="device-tabs"><button class="device-tab active">${phoneIcon()} Telefone</button><button class="device-tab">${laptopIcon()} Chromebook</button><button class="device-tab">${tabletIcon()} Tablet</button></div>`;
+}
+
+function aboutHtml(c) {
+  if (!c.about) return '';
+  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.about.title)}</h2><div class="more-link">${arrowForward()}</div></div>`;
+  h += '<div class="about-text">';
+  if (c.about.sections) {
+    c.about.sections.forEach(s => {
+      if (s.type === 'heading') h += `<div class="about-section-heading">${s.content}</div>`;
+      else if (s.type === 'subheading') h += `<div class="about-section-subheading">${s.content}</div>`;
+      else h += `<p>${s.content}</p>`;
+    });
+  }
+  h += `<div class="about-updated-label">Atualizado em</div>`;
+  h += `<div class="about-date">${esc(c.app.updated)}</div>`;
+  h += '</div>';
+  h += chipsHtml(c);
+  return h;
+}
+
+function chipsHtml(c) {
+  if (!c.categories || !c.categories.length) return '';
+  return `<div class="chips-wrapper">${c.categories.map(cat => `<span class="chip">${esc(cat)}</span>`).join('')}</div>`;
+}
+
+function eventsHtml(c) {
+  if (!c.events || !c.events.items || !c.events.items.length) return '';
+  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.events.title)}</h2></div>`;
+  h += '<div class="events-scroll">';
+  c.events.items.forEach(e => {
+    h += `<div class="event-card"><img src="${esc(e.image)}" alt="" loading="lazy"><div class="event-body"><div class="event-label">${esc(e.label)}</div><div class="event-name">${esc(e.name)}</div></div></div>`;
+  });
+  return h + '</div>';
+}
+
+function safetyHtml(c) {
+  if (!c.dataSafety) return '';
+  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.dataSafety.title)}</h2></div>`;
+  h += `<div class="safety-description">${esc(c.dataSafety.description)}</div>`;
+  h += '<hr class="section-divider">';
+  h += '<div class="safety-items">';
+  if (c.dataSafety.items) {
+    c.dataSafety.items.forEach(item => {
+      h += `<div class="safety-item"><div class="safety-icon">${safetySvg(item.icon)}</div><div><div class="safety-label">${esc(item.label)}</div>${item.detail ? `<div class="safety-detail">${esc(item.detail)}</div>` : ''}</div></div>`;
+    });
+  }
+  h += '</div>';
+  h += `<a class="more-details-link" href="#">Mais detalhes</a>`;
+  return h;
+}
+
+function safetySvg(type) {
+  const icons = {
+    share: '<svg viewBox="0 0 24 24" width="20" height="20" fill="rgb(95,99,104)"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>',
+    collect: '<svg viewBox="0 0 24 24" width="20" height="20" fill="rgb(95,99,104)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>',
+    encrypted: '<svg viewBox="0 0 24 24" width="20" height="20" fill="rgb(95,99,104)"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>',
+    nodelete: '<svg viewBox="0 0 24 24" width="20" height="20" fill="rgb(95,99,104)"><path d="M14.12 10.47L12 12.59l-2.13-2.12-1.41 1.41L10.59 14l-2.12 2.12 1.41 1.41L12 15.41l2.12 2.12 1.41-1.41L13.41 14l2.12-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9z"/></svg>'
+  };
+  return icons[type] || '';
+}
+
+function appSupportHtml(c) {
+  if (!c.appSupport) return '';
+  return `<div class="section-header-row"><h2 class="section-heading">Suporte do app</h2></div>
+    <div class="support-section">
+      <div class="support-left">
+        <div class="support-icon">${emailIcon()}</div>
+        <div><div class="support-label">${esc(c.appSupport.label || 'E-mail')}</div><div class="support-detail">${esc(c.appSupport.detail || '')}</div></div>
+      </div>
+      <div class="support-right">
+        <button class="btn-open" aria-label="Abrir">${expandIcon()}</button>
+      </div>
+    </div>`;
+}
+
+function emailIcon() {
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>';
+}
+function expandIcon() {
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>';
+}
+
+
+
+function reviewsHtml(c) {
+  if (!c.reviews) return '';
+  const rating = parseFloat((c.reviews.rating || '0').replace(',', '.'));
+  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.reviews.title)}</h2><div class="more-link">${arrowForward()}</div></div>`;
+  h += `<div class="verified-badge"><svg viewBox="0 0 24 24" width="14" height="14" fill="rgb(95,99,104)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> As notas e avaliações são verificadas</div>`;
+  h += `${deviceTabsHtml()}`;
+  h += '<div class="ratings-container">';
+  h += `<div class="rating-left"><div class="big-num">${esc(c.reviews.rating)}</div><div class="stars">${starsSvg(rating, 5)}</div><div class="total-reviews">${esc(c.reviews.totalReviews)}</div></div>`;
+  h += '<div class="rating-bars">';
+  ['5','4','3','2','1'].forEach(n => {
+    const max = Math.max(...['5','4','3','2','1'].map(k => parseInt((c.reviews.stars[k]||'0').replace(/\./g,''))));
+    const val = parseInt((c.reviews.stars[n]||'0').replace(/\./g,''));
+    const pct = max > 0 ? (val/max)*100 : 0;
+    h += `<div class="rating-bar-row"><span class="bar-label">${n}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-count">${esc(c.reviews.stars[n])}</span></div>`;
+  });
+  h += '</div></div>';
+  if (c.reviews.items) {
+    c.reviews.items.forEach(r => {
+      const initial = r.name ? r.name.charAt(0).toUpperCase() : '?';
+      h += `<div class="review-item"><div class="review-header"><div class="review-avatar">${r.avatar ? `<img src="${esc(r.avatar)}" alt="">` : initial}</div><div><div class="review-author">${esc(r.name)}</div><div class="review-date">${esc(r.date)}</div></div><div class="review-stars">${starsSvg(r.stars, 5)}</div></div>`;
+      h += `<div class="review-text">${esc(r.text)}</div>`;
+      if (r.helpful > 0) {
+        h += `<div class="review-helpful">Essa avaliação foi marcada como útil por ${r.helpful} pessoa${r.helpful !== 1 ? 's' : ''}</div>`;
+      }
+      h += `<div class="review-actions"><span class="action-label">Esta avaliação foi útil?</span><button class="btn-sim-nao">Sim</button><button class="btn-sim-nao">Não</button></div></div>`;
+    });
+  }
+  h += `<div class="view-all-reviews">Ver todas as avaliações</div>`;
+  return h;
+}
+
+function fillId() { return 'f' + (fillId._c = (fillId._c||0)+1); }
+function starsSvg(filled, total) {
+  let s = '';
+  const f = parseFloat(filled);
+  for (let i = 0; i < total; i++) {
+    if (i < Math.floor(f)) s += '<svg viewBox="0 0 24 24" class="star-filled" width="14" height="14"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+    else if (i < f) { const id = fillId(); s += `<svg viewBox="0 0 24 24" width="14" height="14"><defs><linearGradient id="${id}"><stop offset="${(f-Math.floor(f))*100}%" stop-color="rgb(32,33,36)"/><stop offset="${(f-Math.floor(f))*100}%" stop-color="rgb(218,220,224)"/></linearGradient></defs><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#${id})"/></svg>`; }
+    else s += '<svg viewBox="0 0 24 24" class="star-empty" width="14" height="14"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+  }
+  return s;
+}
+
+function whatsnewHtml(c) {
+  if (!c.whatsNew) return '';
+  return `<div class="section-header-row"><h2 class="section-heading">${esc(c.whatsNew.title)}</h2></div><div class="whatsnew-text">${esc(c.whatsNew.content)}</div>`;
+}
+
+function contentRatingHtml(c) {
+  if (!c.contentRating) return '';
+  return `<hr class="section-divider"><div class="content-rating-row">
+    <svg class="content-rating-icon" viewBox="0 0 24 24" fill="rgb(95,99,104)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <div><div class="content-rating-label">${esc(c.contentRating.label)}</div><div class="content-rating-detail">${esc(c.contentRating.details)}</div></div>
+    <a class="learn-more-link" href="#">Saiba mais</a>
+  </div><hr class="section-divider">`;
+}
+
+function developerMoreHtml(c) {
+  if (!c.developerMore || !c.developerMore.games || !c.developerMore.games.length) return '';
+  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.developerMore.title)}</h2><div class="more-link">${arrowForward()}</div></div>`;
+  h += '<div class="games-scroll">';
+  c.developerMore.games.forEach(g => {
+    h += `<a class="game-card" href="#"><img src="${esc(g.icon)}" alt="" loading="lazy"><div class="game-info"><div class="game-title">${esc(g.title)}</div><div class="game-developer">${esc(g.developer)}</div><div class="game-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${esc(g.rating)}</div></div></a>`;
+  });
+  return h + '</div>';
+}
+
+function similarGamesHtml(c) {
+  if (!c.similarGames || !c.similarGames.games || !c.similarGames.games.length) return '';
+  let h = `<div class="section-header-row"><h2 class="section-heading">${esc(c.similarGames.title)}</h2><div class="more-link">${arrowForward()}</div></div>`;
+  h += '<div class="games-scroll">';
+  c.similarGames.games.forEach(g => {
+    h += `<a class="game-card" href="#"><img src="${esc(g.icon)}" alt="" loading="lazy"><div class="game-info"><div class="game-title">${esc(g.title)}</div><div class="game-developer">${esc(g.developer)}</div><div class="game-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${esc(g.rating)}</div></div></a>`;
+  });
+  return h + '</div>';
+}
+
+function flagHtml() {
+  return `<a class="flag-inappropriate" href="#">${flagIcon()} Sinalizar como impróprio</a>`;
+}
+
+function footerHtml(c) {
+  if (!c.footer) return '';
+  let h = '<hr class="section-divider">';
+  h += '<footer>';
+  h += '<div class="footer-section">';
+  (c.footer.links || []).forEach(l => {
+    h += `<div class="footer-links"><a href="#">${esc(l)}</a></div>`;
+  });
+  h += '</div>';
+  h += '<div class="footer-section">';
+  h += '<div class="footer-title">Crianças e família</div>';
+  h += '<div class="footer-links">';
+  (c.footer.family || []).forEach(l => {
+    h += `<a href="#">${esc(l)}</a>`;
+  });
+  h += '</div></div>';
+  h += '<hr class="divider">';
+  (c.footer.legal || []).forEach(l => {
+    h += `<div class="footer-links"><a href="#">${esc(l)}</a></div>`;
+  });
+  h += '<div class="footer-tribute">Todos os preços incluem Tributo.</div>';
+  h += '<hr class="divider">';
+  h += `<div class="footer-country"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> ${esc(c.footer.country)}</div>`;
+  h += '</footer>';
+  return h;
+}
+
+</script>
+</body>
+</html>

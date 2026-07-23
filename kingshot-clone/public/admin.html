@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - Kingshot Clone</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.admin-body { background: #f7f8fa; max-width: 720px; margin: 0 auto; padding: 16px; font-family: 'Google Sans', Roboto, Arial, sans-serif; }
+h1 { font-size: 22px; margin-bottom: 16px; }
+h2 { font-size: 16px; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #e8eaed; }
+.section { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #e8eaed; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: #5f6368; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .3px; }
+.field input, .field textarea, .field select { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #dadce0; border-radius: 6px; font-family: inherit; }
+.field textarea { min-height: 60px; resize: vertical; }
+.field input:focus, .field textarea:focus { border-color: #01875f; outline: none; }
+.array-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
+.array-item input { width: calc(100% - 80px); }
+.array-item .btn-remove { background: #e8eaed; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: #c5221f; margin-left: 6px; }
+.array-item .btn-remove:hover { background: #fce8e6; }
+.btn-add { background: #e8eaed; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; color: #1a1a1a; }
+.btn-add:hover { background: #dadce0; }
+.btn-save { background: #01875f; color: #fff; border: none; border-radius: 24px; padding: 12px 40px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; text-transform: uppercase; letter-spacing: .5px; }
+.btn-save:hover { background: #016e4c; }
+.status { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; display: none; }
+.status.success { background: #e6f4ea; color: #137333; display: block; }
+.status.error { background: #fce8e6; color: #c5221f; display: block; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; background: #fff; border-radius: 24px; padding: 4px; border: 1px solid #e8eaed; overflow-x: auto; }
+.tab { padding: 8px 16px; font-size: 13px; border: none; background: transparent; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 500; color: #5f6368; }
+.tab.active { background: #01875f; color: #fff; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.about-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
+.about-item select { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 6px; }
+.about-item textarea { width: 100%; min-height: 50px; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; resize: vertical; font-family: inherit; }
+.full-width-btn { display: block; width: 100%; margin: 4px 0; }
+.review-item { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
+.review-item .row { display: flex; gap: 8px; margin-bottom: 6px; }
+.review-item .row input { flex: 1; }
+.safety-item-edit { background: #f7f8fa; border-radius: 6px; padding: 10px; margin-bottom: 8px; border: 1px solid #e8eaed; }
+.safety-item-edit select, .safety-item-edit input { width: 100%; padding: 6px; font-size: 13px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 4px; }
+.app-manager { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid #e8eaed; }
+.app-manager select { flex: 1; }
+@media (max-width: 480px) { .admin-body { padding: 12px; } .tab { padding: 6px 12px; font-size: 12px; } }
+</style>
+</head>
+<body>
+<div class="admin-body" id="admin">
+  <h1>Admin - Play Store Clone</h1>
+  <div class="status" id="status"></div>
+  <div class="app-manager">
+    <select id="appSelect" style="flex:1;padding:8px;font-size:14px;border:1px solid #dadce0;border-radius:6px"></select>
+    <button class="btn-add" id="newAppBtn" style="white-space:nowrap">+ Novo</button>
+    <button class="btn-remove" id="delAppBtn" style="white-space:nowrap">Excluir</button>
+    <a id="previewLink" target="_blank" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:13px;color:#01875f;text-decoration:none;font-weight:500">Abrir</a>
+  </div>
+  <div class="tab-bar" id="tabs"></div>
+  <div id="forms"></div>
+  <button class="btn-save" id="saveBtn" style="margin-top:16px">Salvar tudo</button>
+</div>
+<script>
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = '' + s; return d.innerHTML; }
+let config = null;
+let currentSlug = '';
+let appList = [];
+const fields = [
+  { id: 'header', label: 'Header', tabs: [
+    { id: 'header_main', label: 'Header', fields: [
+      { key: 'header.logo', label: 'URL do Logo', type: 'text' },
+      { key: 'header.title', label: 'Título', type: 'text' },
+    ]},
+  ]},
+  { id: 'app', label: 'App', tabs: [
+    { id: 'app_basic', label: 'Básico', fields: [
+      { key: 'app.icon', label: 'URL do Ícone', type: 'text' },
+      { key: 'app.title', label: 'Título do App', type: 'text' },
+      { key: 'app.developer', label: 'Desenvolvedor', type: 'text' },
+      { key: 'app.developerUrl', label: 'URL do Desenvolvedor', type: 'text' },
+      { key: 'app.badge', label: 'Badge', type: 'text' },
+      { key: 'app.rating', label: 'Nota', type: 'text' },
+      { key: 'app.reviews', label: 'Avaliações', type: 'text' },
+      { key: 'app.downloads', label: 'Downloads', type: 'text' },
+      { key: 'app.updated', label: 'Atualizado em', type: 'text' },
+    ]},
+    { id: 'app_screenshots', label: 'Screenshots', type: 'array', key: 'screenshots' },
+    { id: 'app_categories', label: 'Categorias', type: 'array', key: 'categories' },
+  ]},
+  { id: 'about', label: 'Sobre', tabs: [
+    { id: 'about_tab', label: 'Sobre o jogo', type: 'about' },
+  ]},
+  { id: 'safety', label: 'Segurança', tabs: [
+    { id: 'safety_main', label: 'Dados', fields: [
+      { key: 'dataSafety.title', label: 'Título', type: 'text' },
+      { key: 'dataSafety.description', label: 'Descrição', type: 'textarea' },
+    ]},
+    { id: 'safety_items', label: 'Itens', type: 'safetyItems' },
+  ]},
+  { id: 'support', label: 'Suporte', tabs: [
+    { id: 'support_main', label: 'Suporte', fields: [
+      { key: 'appSupport.label', label: 'Label (ex: E-mail)', type: 'text' },
+      { key: 'appSupport.detail', label: 'Detalhes (ex: email@dev.com)', type: 'text' },
+    ]},
+  ]},
+  { id: 'reviews', label: 'Avaliações', tabs: [
+    { id: 'rev_tab', label: 'Avaliações', fields: [
+      { key: 'reviews.title', label: 'Título', type: 'text' },
+      { key: 'reviews.rating', label: 'Nota Geral', type: 'text' },
+      { key: 'reviews.totalReviews', label: 'Total Avaliações', type: 'text' },
+      { key: 'reviews.stars.5', label: 'Estrelas 5', type: 'text' },
+      { key: 'reviews.stars.4', label: 'Estrelas 4', type: 'text' },
+      { key: 'reviews.stars.3', label: 'Estrelas 3', type: 'text' },
+      { key: 'reviews.stars.2', label: 'Estrelas 2', type: 'text' },
+      { key: 'reviews.stars.1', label: 'Estrelas 1', type: 'text' },
+    ]},
+    { id: 'rev_items', label: 'Reviews', type: 'reviews' },
+  ]},
+  { id: 'more', label: 'Extras', tabs: [
+    { id: 'whatsnew', label: 'Novidades', fields: [
+      { key: 'whatsNew.title', label: 'Título', type: 'text' },
+      { key: 'whatsNew.content', label: 'Conteúdo', type: 'textarea' },
+    ]},
+    { id: 'content_rating', label: 'Classificação', fields: [
+      { key: 'contentRating.label', label: 'Label', type: 'text' },
+      { key: 'contentRating.details', label: 'Detalhes', type: 'text' },
+    ]},
+    { id: 'events', label: 'Eventos', type: 'events' },
+    { id: 'dev_games', label: 'Do Desenvolvedor', type: 'gameList', key: 'developerMore' },
+    { id: 'similar_games', label: 'Semelhantes', type: 'gameList', key: 'similarGames' },
+    { id: 'footer_edit', label: 'Footer', type: 'footer' },
+  ]},
+];
+
+const tabBar = document.getElementById('tabs');
+const formsContainer = document.getElementById('forms');
+const statusEl = document.getElementById('status');
+
+let activeSection = 0;
+let activeTab = {};
+
+async function loadAppList() {
+  const r = await fetch('/api/configs');
+  appList = await r.json();
+  const sel = document.getElementById('appSelect');
+  sel.innerHTML = appList.map(a => `<option value="${esc(a.slug)}" ${a.slug === currentSlug ? 'selected' : ''}>${esc(a.title)}</option>`).join('');
+  document.getElementById('previewLink').href = `/?app=${encodeURIComponent(currentSlug)}`;
+}
+
+async function loadConfig(slug) {
+  currentSlug = slug || currentSlug;
+  const r = await fetch('/api/config?app=' + encodeURIComponent(currentSlug));
+  config = await r.json();
+  await loadAppList();
+  renderTabs();
+}
+
+function init() { loadConfig('kingshot'); }
+
+document.getElementById('appSelect').addEventListener('change', e => loadConfig(e.target.value));
+document.getElementById('newAppBtn').addEventListener('click', async () => {
+  const name = prompt('Nome do novo app (slug):', 'meu-app');
+  if (!name) return;
+  const r = await fetch('/api/configs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: name, title: name }) });
+  if (!r.ok) return alert('Erro: slug já existe ou inválido');
+  await loadConfig(name);
+});
+document.getElementById('delAppBtn').addEventListener('click', async () => {
+  if (!confirm(`Excluir "${currentSlug}"?`)) return;
+  await fetch('/api/config?app=' + encodeURIComponent(currentSlug), { method: 'DELETE' });
+  const remaining = appList.filter(a => a.slug !== currentSlug);
+  if (remaining.length) await loadConfig(remaining[0].slug);
+  else await loadConfig('kingshot');
+});
+
+function renderTabs() {
+  tabBar.innerHTML = fields.map((f, i) =>
+    `<button class="tab ${i === activeSection ? 'active' : ''}" data-section="${i}">${f.label}</button>`
+  ).join('');
+  tabBar.querySelectorAll('.tab').forEach(el => {
+    el.addEventListener('click', () => {
+      activeSection = parseInt(el.dataset.section);
+      renderTabs();
+    });
+  });
+  renderForms();
+}
+
+function renderForms() {
+  formsContainer.innerHTML = '';
+  const section = fields[activeSection];
+  activeTab[activeSection] = activeTab[activeSection] || 0;
+  const tabHtml = section.tabs.map((t, i) =>
+    `<button class="tab ${i === activeTab[activeSection] ? 'active' : ''}" data-tab="${i}">${t.label}</button>`
+  ).join('');
+  const tabBar2 = document.createElement('div');
+  tabBar2.className = 'tab-bar';
+  tabBar2.innerHTML = tabHtml;
+  tabBar2.querySelectorAll('[data-tab]').forEach(el => {
+    el.addEventListener('click', () => {
+      activeTab[activeSection] = parseInt(el.dataset.tab);
+      renderForms();
+    });
+  });
+  formsContainer.appendChild(tabBar2);
+  const tab = section.tabs[activeTab[activeSection]];
+  if (tab.type === 'array') renderArrayField(tab);
+  else if (tab.type === 'about') renderAbout();
+  else if (tab.type === 'reviews') renderReviews();
+  else if (tab.type === 'events') renderEvents();
+  else if (tab.type === 'gameList') renderGameList(tab);
+  else if (tab.type === 'safetyItems') renderSafetyItems();
+  else if (tab.type === 'footer') renderFooter();
+  else renderFields(tab.fields);
+}
+
+function renderFields(fs, container) {
+  container = container || formsContainer;
+  fs.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'field';
+    const val = getVal(f.key) || '';
+    if (f.type === 'textarea') {
+      div.innerHTML = `<label>${f.label}</label><textarea data-key="${f.key}">${h(val)}</textarea>`;
+    } else {
+      div.innerHTML = `<label>${f.label}</label><input type="${f.type}" data-key="${f.key}" value="${h(val)}">`;
+    }
+    container.appendChild(div);
+    const el = div.querySelector('[data-key]');
+    el.addEventListener('input', () => setVal(f.key, el.value));
+  });
+}
+
+function renderArrayField(tab) {
+  const container = document.createElement('div');
+  container.className = 'section';
+  renderArray(tab.key, container, (item, ci) => {
+    return `<div class="array-item"><input type="text" value="${h(item)}" data-idx="${ci}"><button class="btn-remove" data-action="remove" data-idx="${ci}">Remover</button></div>`;
+  }, () => {
+    const arr = getValRaw(tab.key) || [];
+    arr.push('');
+    setValRaw(tab.key, arr);
+    renderForms();
+  });
+  formsContainer.appendChild(container);
+}
+
+function renderAbout() {
+  const container = document.createElement('div');
+  container.className = 'section';
+  const data = config.about;
+  if (!data) return;
+  renderFields([{ key: 'about.title', label: 'Título', type: 'text' }], container);
+  const sections = data.sections || [];
+  sections.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'about-item';
+    div.innerHTML = `
+      <select data-idx="${i}">
+        <option value="text" ${s.type === 'text' ? 'selected' : ''}>Texto</option>
+        <option value="heading" ${s.type === 'heading' ? 'selected' : ''}>Título de seção</option>
+        <option value="subheading" ${s.type === 'subheading' ? 'selected' : ''}>Subtítulo</option>
+      </select>
+      <textarea data-idx="${i}">${h(s.content)}</textarea>
+      <button class="btn-remove" data-action="remove-section" data-idx="${i}">Remover</button>
+    `;
+    container.appendChild(div);
+    div.querySelector('select').addEventListener('change', e => { data.sections[i].type = e.target.value; });
+    div.querySelector('textarea').addEventListener('input', e => { data.sections[i].content = e.target.value; });
+    div.querySelector('[data-action="remove-section"]').addEventListener('click', () => {
+      data.sections.splice(i, 1);
+      renderForms();
+    });
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add full-width-btn';
+  addBtn.textContent = '+ Adicionar seção';
+  addBtn.addEventListener('click', () => {
+    data.sections.push({ type: 'text', content: '' });
+    renderForms();
+  });
+  container.appendChild(addBtn);
+  formsContainer.appendChild(container);
+}
+
+function renderSafetyItems() {
+  const container = document.createElement('div');
+  container.className = 'section';
+  const items = config.dataSafety?.items || [];
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'safety-item-edit';
+    div.innerHTML = `
+      <select data-field="icon" data-idx="${i}">
+        <option value="share" ${item.icon === 'share' ? 'selected' : ''}>Compartilhar</option>
+        <option value="collect" ${item.icon === 'collect' ? 'selected' : ''}>Coletar</option>
+        <option value="encrypted" ${item.icon === 'encrypted' ? 'selected' : ''}>Criptografado</option>
+        <option value="nodelete" ${item.icon === 'nodelete' ? 'selected' : ''}>Não deletar</option>
+      </select>
+      <input placeholder="Label" value="${h(item.label)}" data-field="label" data-idx="${i}">
+      <input placeholder="Detalhe (opcional)" value="${h(item.detail)}" data-field="detail" data-idx="${i}">
+      <button class="btn-remove" data-action="remove-safety" data-idx="${i}">Remover</button>
+    `;
+    container.appendChild(div);
+    div.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('input', e => { items[i][el.dataset.field] = el.value; });
+    });
+    div.querySelector('[data-action="remove-safety"]').addEventListener('click', () => {
+      items.splice(i, 1);
+      renderForms();
+    });
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add full-width-btn';
+  addBtn.textContent = '+ Adicionar item';
+  addBtn.addEventListener('click', () => {
+    items.push({ icon: 'share', label: '', detail: '' });
+    renderForms();
+  });
+  container.appendChild(addBtn);
+  formsContainer.appendChild(container);
+}
+
+function renderReviews() {
+  const container = document.createElement('div');
+  container.className = 'section';
+  const items = config.reviews.items || [];
+  items.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML = `
+      <div class="row"><input placeholder="Nome" value="${h(r.name)}" data-field="name" data-idx="${i}"><input placeholder="Data" value="${h(r.date)}" data-field="date" data-idx="${i}"></div>
+      <div class="row"><input placeholder="Avatar URL" value="${h(r.avatar)}" data-field="avatar" data-idx="${i}"><input placeholder="Estrelas (1-5)" type="number" min="1" max="5" value="${r.stars}" data-field="stars" data-idx="${i}"></div>
+      <textarea data-field="text" data-idx="${i}" placeholder="Texto da avaliação">${h(r.text)}</textarea>
+      <div class="row" style="margin-top:6px"><input placeholder="Úteis" type="number" value="${r.helpful}" data-field="helpful" data-idx="${i}"><button class="btn-remove" data-action="remove-review" data-idx="${i}">Remover</button></div>
+    `;
+    container.appendChild(div);
+    div.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('input', e => {
+        items[i][el.dataset.field] = el.type === 'number' ? parseInt(el.value) || 0 : el.value;
+      });
+    });
+    div.querySelector('[data-action="remove-review"]').addEventListener('click', () => {
+      items.splice(i, 1);
+      renderForms();
+    });
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add full-width-btn';
+  addBtn.textContent = '+ Adicionar avaliação';
+  addBtn.addEventListener('click', () => {
+    items.push({ name: '', avatar: '', stars: 5, date: '', text: '', helpful: 0 });
+    renderForms();
+  });
+  container.appendChild(addBtn);
+  formsContainer.appendChild(container);
+}
+
+function renderEvents() {
+  const container = document.createElement('div');
+  container.className = 'section';
+  const data = config.events;
+  if (!data) return;
+  renderFields([{ key: 'events.title', label: 'Título', type: 'text' }], container);
+  const items = data.items || [];
+  items.forEach((ev, i) => {
+    const div = document.createElement('div');
+    div.className = 'array-item';
+    div.innerHTML = `
+      <div style="margin-bottom:4px"><input placeholder="URL da imagem" value="${h(ev.image)}" data-idx="${i}" data-ev="image" style="width:100%"></div>
+      <div style="display:flex;gap:6px"><input placeholder="Label" value="${h(ev.label)}" data-idx="${i}" data-ev="label" style="flex:1"><input placeholder="Nome" value="${h(ev.name)}" data-idx="${i}" data-ev="name" style="flex:1"><button class="btn-remove" data-action="remove-event" data-idx="${i}">Remover</button></div>
+    `;
+    container.appendChild(div);
+    div.querySelectorAll('[data-ev]').forEach(el => {
+      el.addEventListener('input', e => items[i][el.dataset.ev] = el.value);
+    });
+    div.querySelector('[data-action="remove-event"]').addEventListener('click', () => {
+      items.splice(i, 1);
+      renderForms();
+    });
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add full-width-btn';
+  addBtn.textContent = '+ Adicionar evento';
+  addBtn.addEventListener('click', () => {
+    items.push({ image: '', label: '', name: '' });
+    renderForms();
+  });
+  container.appendChild(addBtn);
+  formsContainer.appendChild(container);
+}
+
+function renderGameList(tab) {
+  const container = document.createElement('div');
+  container.className = 'section';
+  const data = config[tab.key];
+  if (!data) return;
+  renderFields([{ key: `${tab.key}.title`, label: 'Título', type: 'text' }], container);
+  const items = data.games || [];
+  items.forEach((g, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML = `
+      <div class="row"><input placeholder="Título" value="${h(g.title)}" data-field="title" data-idx="${i}"><input placeholder="Desenvolvedor" value="${h(g.developer)}" data-field="developer" data-idx="${i}"></div>
+      <div class="row"><input placeholder="Icon URL" value="${h(g.icon)}" data-field="icon" data-idx="${i}"><input placeholder="Nota" value="${h(g.rating)}" data-field="rating" data-idx="${i}"><button class="btn-remove" data-action="remove-game" data-idx="${i}">Remover</button></div>
+    `;
+    container.appendChild(div);
+    div.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('input', e => items[i][el.dataset.field] = el.value);
+    });
+    div.querySelector('[data-action="remove-game"]').addEventListener('click', () => {
+      items.splice(i, 1);
+      renderForms();
+    });
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add full-width-btn';
+  addBtn.textContent = '+ Adicionar jogo';
+  addBtn.addEventListener('click', () => {
+    items.push({ icon: '', title: '', developer: '', rating: '' });
+    renderForms();
+  });
+  container.appendChild(addBtn);
+  formsContainer.appendChild(container);
+}
+
+function renderFooter() {
+  const container = document.createElement('div');
+  container.className = 'section';
+  renderFields([{ key: 'footer.country', label: 'País', type: 'text' }], container);
+  ['links', 'family', 'legal'].forEach(group => {
+    const h = document.createElement('h2');
+    h.textContent = { links: 'Links', family: 'Família', legal: 'Legal' }[group];
+    container.appendChild(h);
+    renderArray('footer.' + group, container, (item, ci) => {
+      return `<div class="array-item"><input type="text" value="${h(item)}" data-idx="${ci}"><button class="btn-remove" data-action="remove" data-idx="${ci}">Remover</button></div>`;
+    }, () => {
+      const arr = getValRaw('footer.' + group) || [];
+      arr.push('');
+      setValRaw('footer.' + group, arr);
+      renderForms();
+    });
+  });
+  formsContainer.appendChild(container);
+}
+
+function renderArray(key, container, itemHtml, onAdd) {
+  const arr = getValRaw(key) || [];
+  arr.forEach((item, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = itemHtml(item, i);
+    container.appendChild(wrapper.firstElementChild);
+    const inputs = container.querySelectorAll(`[data-idx="${i}"]`);
+    inputs.forEach(inp => {
+      if (inp.tagName === 'INPUT') {
+        inp.addEventListener('input', e => {
+          arr[i] = inp.value;
+          setValRaw(key, arr);
+        });
+      }
+    });
+    container.querySelector(`[data-action="remove"][data-idx="${i}"]`)?.addEventListener('click', () => {
+      arr.splice(i, 1);
+      setValRaw(key, arr);
+      renderForms();
+    });
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add full-width-btn';
+  addBtn.textContent = '+ Adicionar';
+  addBtn.addEventListener('click', onAdd);
+  container.appendChild(addBtn);
+}
+
+function getVal(path) {
+  const parts = path.split('.');
+  let o = config;
+  for (const p of parts) o = o?.[p];
+  return o !== undefined ? o : '';
+}
+
+function getValRaw(path) {
+  const parts = path.split('.');
+  let o = config;
+  for (const p of parts) o = o?.[p];
+  return o;
+}
+
+function setVal(path, val) {
+  const parts = path.split('.');
+  let o = config;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!o[parts[i]]) o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  o[parts[parts.length - 1]] = val;
+}
+
+function setValRaw(key, val) {
+  const parts = key.split('.');
+  let o = config;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!o[parts[i]]) o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  o[parts[parts.length - 1]] = val;
+}
+
+function h(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = '' + s;
+  return d.innerHTML;
+}
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/api/config?app=' + encodeURIComponent(currentSlug), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (r.ok) {
+      statusEl.className = 'status success';
+      statusEl.textContent = 'Salvo com sucesso!';
+      setTimeout(() => { statusEl.className = 'status'; }, 3000);
+    } else throw new Error('Erro ao salvar');
+  } catch (e) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Erro: ' + e.message;
+  }
+});
+
+init();
+</script>
+</body>
+</html>

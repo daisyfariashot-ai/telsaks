@@ -1,0 +1,367 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Face ID - Reconhecimento Facial</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: radial-gradient(ellipse at 50% 40%, #111122 0%, #000 70%);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.container { text-align: center; padding: 1rem; }
+
+/* ===== ELLIPSE SIZES ===== */
+.ellipse-wrapper {
+  position: relative;
+  width: min(300px, 72vw);
+  aspect-ratio: 300 / 380;
+  margin: 1rem auto 1.5rem;
+  transition: transform .9s cubic-bezier(.22,.61,.36,1), margin .9s;
+  transform: scale(0.65);
+}
+.ellipse-wrapper.sz-md { transform: scale(0.82); margin-bottom: 2.5rem; }
+.ellipse-wrapper.sz-lg { transform: scale(1.0); margin-bottom: 3.5rem; }
+
+.ellipse {
+  width: 100%; height: 100%;
+  border: 3px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color .5s, box-shadow .5s;
+}
+
+/* idle pulse */
+.ellipse-wrapper:not(.sz-md):not(.sz-lg) .ellipse {
+  animation: idle-glow 3s ease-in-out infinite;
+}
+@keyframes idle-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(150,150,255,.04); }
+  50% { box-shadow: 0 0 35px rgba(150,150,255,.10); }
+}
+
+/* scanning */
+.ellipse.scanning {
+  border-color: #e8a840;
+  box-shadow: 0 0 40px rgba(232,168,64,.15), 0 0 80px rgba(232,168,64,.05);
+  animation: scan-pulse 2.2s ease-in-out infinite;
+}
+@keyframes scan-pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(232,168,64,.10), 0 0 60px rgba(232,168,64,.03); }
+  50% { box-shadow: 0 0 50px rgba(232,168,64,.25), 0 0 100px rgba(232,168,64,.08); }
+}
+
+.ellipse.success {
+  border-color: #34c759;
+  box-shadow: 0 0 35px rgba(52,199,89,.20);
+  animation: none;
+}
+.ellipse.fail {
+  border-color: #ff3b30;
+  box-shadow: 0 0 25px rgba(255,59,48,.18);
+  animation: none;
+}
+
+/* video + vignette */
+.ellipse video {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: .55;
+  z-index: 0;
+}
+.ellipse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.5) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* inner ring */
+.ellipse-inner {
+  width: 72%; height: 72%;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 50%;
+  position: absolute;
+  z-index: 2;
+  transition: border-color .5s, box-shadow .5s;
+}
+.ellipse.scanning .ellipse-inner {
+  border-color: rgba(232,168,64,.25);
+  box-shadow: inset 0 0 25px rgba(232,168,64,.06);
+}
+.ellipse.success .ellipse-inner {
+  border-color: rgba(52,199,89,.30);
+  box-shadow: 0 0 30px rgba(52,199,89,.12);
+}
+
+/* face silhouette hint */
+.face-hint {
+  position: absolute;
+  z-index: 2;
+  width: 38%;
+  opacity: .12;
+  transition: opacity .4s;
+  pointer-events: none;
+}
+.ellipse.scanning .face-hint,
+.ellipse.success .face-hint,
+.ellipse.fail .face-hint { opacity: 0; }
+
+/* scan line */
+.scan-line {
+  position: absolute;
+  left: 8%;
+  width: 84%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, rgba(232,168,64,.4) 20%, #e8a840 50%, rgba(232,168,64,.4) 80%, transparent 100%);
+  box-shadow: 0 0 20px rgba(232,168,64,.5), 0 0 50px rgba(232,168,64,.15);
+  z-index: 3;
+  opacity: 0;
+  transition: opacity .4s;
+}
+.scan-line.active {
+  opacity: 1;
+  animation: sweep 3.2s ease-in-out infinite;
+}
+@keyframes sweep {
+  0% { top: 8%; }
+  50% { top: 88%; }
+  100% { top: 8%; }
+}
+
+/* status */
+.status {
+  min-height: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+}
+.status h2 {
+  font-weight: 400;
+  font-size: clamp(.95rem, 3.5vw, 1.15rem);
+  color: rgba(255,255,255,.85);
+  transition: opacity .3s;
+  letter-spacing: .01em;
+}
+
+.loader {
+  width: 36px; height: 36px;
+  border: 2.5px solid rgba(255,255,255,.08);
+  border-top-color: #e8a840;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: .5rem auto 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.checkmark {
+  font-size: 2.8rem; line-height: 1;
+  animation: pop .35s cubic-bezier(.34,1.56,.64,1);
+  margin-top: .25rem;
+}
+@keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+.btn {
+  margin-top: 1rem;
+  padding: .7rem 1.6rem;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.75);
+  font-size: .95rem;
+  cursor: pointer;
+  transition: background .2s, opacity .2s, border-color .2s;
+  min-height: 44px;
+  letter-spacing: .01em;
+}
+.btn:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.25); }
+.btn:active { transform: scale(.97); }
+.btn:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="ellipse-wrapper" id="ellipseWrapper">
+    <div class="ellipse" id="ellipse" role="img" aria-label="Visualizador de camera para reconhecimento facial">
+      <video id="video" muted playsinline></video>
+      <svg class="face-hint" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="1.5">
+        <ellipse cx="38" cy="38" rx="8" ry="10"/>
+        <ellipse cx="62" cy="38" rx="8" ry="10"/>
+        <ellipse cx="50" cy="58" rx="16" ry="12"/>
+      </svg>
+      <div class="ellipse-inner" aria-hidden="true"></div>
+      <div class="scan-line" id="scanLine" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="status" id="status" role="status" aria-live="polite">
+    <h2 id="title">Posicione o rosto na elipse</h2>
+  </div>
+  <button class="btn" id="actionBtn">Iniciar</button>
+</div>
+<script>
+  const states = {
+    INIT:     { title: "Posicione o rosto na elipse",     ellipse: "",        size: "" },
+    SCAN1:    { title: "Escaneando...",                    ellipse: "scanning", size: "" },
+    APPROACH: { title: "Aproxime o rosto da camera",       ellipse: "",        size: "sz-md" },
+    SCAN2:    { title: "Verificando...",                    ellipse: "scanning", size: "sz-lg" },
+    DONE:     { title: "Face ID confirmado",                ellipse: "success",  size: "sz-lg" },
+    FAIL:     { title: "Falha no reconhecimento",           ellipse: "fail",     size: "sz-lg" },
+  };
+
+  const video = document.getElementById("video");
+  const ellipse = document.getElementById("ellipse");
+  const wrapper = document.getElementById("ellipseWrapper");
+  const scanLine = document.getElementById("scanLine");
+  const title = document.getElementById("title");
+  const btn = document.getElementById("actionBtn");
+  const statusDiv = document.getElementById("status");
+  let stream = null;
+  let currentState = "INIT";
+  let running = false;
+
+  function randomSuccess() { return Math.random() < 0.75; }
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function getCamera() {
+    stopCam();
+    if (!navigator.mediaDevices?.getUserMedia) return false;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      video.srcObject = stream;
+      try { await video.play(); } catch(e) {}
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function stopCam() {
+    stream?.getTracks().forEach(t => t.stop());
+    stream = null;
+    video.srcObject = null;
+  }
+
+  function setState(name) {
+    currentState = name;
+    const s = states[name];
+    title.textContent = s.title;
+    ellipse.className = "ellipse" + (s.ellipse ? " " + s.ellipse : "");
+    scanLine.classList.toggle("active", s.ellipse === "scanning");
+    wrapper.className = "ellipse-wrapper" + (s.size ? " " + s.size : "");
+    clearExtras();
+
+    if (name === "SCAN1" || name === "SCAN2") {
+      showLoader();
+      btn.classList.add("hidden");
+    } else if (name === "DONE") {
+      showCheckmark();
+      btn.classList.remove("hidden");
+    } else if (name === "FAIL") {
+      btn.classList.remove("hidden");
+    }
+    btn.disabled = true;
+  }
+
+  function clearExtras() {
+    statusDiv.querySelectorAll(".loader, .checkmark").forEach(el => el.remove());
+  }
+
+  function showLoader() {
+    const el = document.createElement("div");
+    el.className = "loader";
+    el.setAttribute("aria-label", "Carregando");
+    statusDiv.appendChild(el);
+  }
+
+  function showCheckmark() {
+    const el = document.createElement("div");
+    el.className = "checkmark";
+    el.innerHTML = "&#10003;";
+    el.style.color = "#34c759";
+    el.setAttribute("aria-hidden", "true");
+    statusDiv.appendChild(el);
+  }
+
+  async function runFlow() {
+    if (running) return;
+    running = true;
+    btn.classList.add("hidden");
+
+    const hasCamera = await getCamera();
+    if (!hasCamera) {
+      setState("FAIL");
+      title.textContent = "Camera indisponivel";
+      btn.textContent = "Tentar novamente";
+      btn.classList.remove("hidden");
+      btn.disabled = false;
+      running = false;
+      return;
+    }
+
+    setState("SCAN1");
+    await sleep(5000);
+
+    setState("APPROACH");
+    await sleep(4000);
+
+    setState("SCAN2");
+    await sleep(6000);
+
+    stopCam();
+
+    if (randomSuccess()) {
+      setState("DONE");
+    } else {
+      setState("FAIL");
+    }
+    btn.textContent = "Reiniciar";
+    btn.classList.remove("hidden");
+    btn.disabled = false;
+    running = false;
+  }
+
+  function reset() {
+    running = false;
+    stopCam();
+    setState("INIT");
+    btn.textContent = "Iniciar";
+    btn.classList.remove("hidden");
+    btn.disabled = false;
+  }
+
+  btn.addEventListener("click", () => {
+    if (currentState === "INIT" || currentState === "FAIL" || currentState === "DONE") {
+      if (currentState !== "INIT") reset();
+      runFlow();
+    }
+  });
+
+  addEventListener("beforeunload", stopCam);
+</script>
+</body>
+</html>

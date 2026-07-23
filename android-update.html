@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Android - Atualização de Sistema</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0a;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+  overflow: hidden;
+}
+.container {
+  text-align: center;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Screen switching */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* Update screen */
+.android-robot {
+  margin: 2rem auto 1.5rem;
+  position: relative;
+  width: 120px;
+  height: 150px;
+}
+.robot-body {
+  width: 100px;
+  height: 95px;
+  background: #3ddc84;
+  border-radius: 20px;
+  margin: 20px auto 0;
+  position: relative;
+  transition: transform .6s;
+}
+.robot-body.spinning { animation: robotSpin 1.5s ease-in-out infinite; }
+@keyframes robotSpin {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(12deg); }
+  70% { transform: rotate(-12deg); }
+}
+.antenna {
+  position: absolute;
+  width: 4px;
+  height: 30px;
+  background: #3ddc84;
+  top: -28px;
+  border-radius: 2px;
+}
+.antenna.left { left: 24px; transform: rotate(-20deg); }
+.antenna.right { right: 24px; transform: rotate(20deg); }
+.antenna::after {
+  content: '';
+  position: absolute;
+  width: 8px; height: 8px;
+  background: #3ddc84;
+  border-radius: 50%;
+  top: -4px;
+  left: -2px;
+}
+.robot-eyes {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  padding-top: 24px;
+}
+.robot-eyes span {
+  width: 14px; height: 14px;
+  background: #0a0a0a;
+  border-radius: 50%;
+  display: block;
+}
+.robot-arms {
+  position: absolute;
+  top: 28px;
+  width: 100%; height: 40px;
+}
+.arm {
+  position: absolute;
+  width: 4px; height: 50px;
+  background: #3ddc84;
+  border-radius: 2px;
+  top: 0;
+}
+.arm.left { left: -8px; transform: rotate(25deg); }
+.arm.right { right: -8px; transform: rotate(-25deg); }
+.robot-legs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 2px;
+}
+.leg {
+  width: 4px;
+  height: 35px;
+  background: #3ddc84;
+  border-radius: 2px;
+}
+
+.update-title {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #3ddc84;
+}
+.update-subtitle {
+  font-size: .85rem;
+  color: rgba(255,255,255,.5);
+  margin-top: .4rem;
+}
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,.1);
+  border-radius: 3px;
+  margin: 2rem auto 0;
+  overflow: hidden;
+  max-width: 300px;
+}
+.progress-fill {
+  height: 100%;
+  background: #3ddc84;
+  border-radius: 3px;
+  width: 0%;
+  transition: width .3s;
+}
+.progress-fill.running { animation: progressAnim 8s ease-in-out forwards; }
+@keyframes progressAnim {
+  0% { width: 0%; }
+  60% { width: 70%; }
+  85% { width: 82%; }
+  100% { width: 85%; }
+}
+
+/* PIN screen */
+.pin-header {
+  margin-bottom: 2rem;
+}
+.pin-header .lock-icon {
+  font-size: 2.5rem;
+  margin-bottom: .75rem;
+}
+.pin-header h2 {
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+.pin-header p {
+  font-size: .85rem;
+  color: rgba(255,255,255,.5);
+  margin-top: .3rem;
+}
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.pin-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.3);
+  transition: .2s;
+}
+.pin-dot.filled { background: #3ddc84; border-color: #3ddc84; }
+.pin-dot.error { background: #ff3b30; border-color: #ff3b30; }
+.pin-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .6rem;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.pin-key {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pin-key:active { background: rgba(255,255,255,.2); }
+.pin-key.empty { background: transparent; pointer-events: none; }
+
+.pin-msg {
+  margin-top: 1.5rem;
+  font-size: .85rem;
+  min-height: 2rem;
+  transition: color .3s;
+}
+.pin-msg.error { color: #ff3b30; }
+
+/* Done screen */
+.done-screen .check-circle {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: #3ddc84;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem auto 1.5rem;
+  font-size: 3rem;
+  animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.done-screen h2 { font-size: 1.25rem; font-weight: 400; }
+.done-screen p { font-size: .85rem; color: rgba(255,255,255,.5); margin-top: .3rem; }
+
+.restart-btn {
+  margin-top: 2rem;
+  padding: .75rem 2.5rem;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+.restart-btn:active { background: rgba(255,255,255,.15); }
+.delete-key { font-size: 1rem; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+</style>
+</head>
+<body>
+
+<!-- Screen 1: Android Update -->
+<div class="screen active" id="updateScreen">
+  <div class="container">
+    <div class="android-robot">
+      <div class="robot-body" id="robotBody">
+        <div class="antenna left"></div>
+        <div class="antenna right"></div>
+        <div class="robot-eyes"><span></span><span></span></div>
+        <div class="robot-arms">
+          <div class="arm left"></div>
+          <div class="arm right"></div>
+        </div>
+      </div>
+      <div class="robot-legs">
+        <div class="leg"></div><div class="leg"></div>
+      </div>
+    </div>
+    <div class="update-title">Instalando atualização do sistema</div>
+    <div class="update-subtitle" id="updateSub">Não desligue o dispositivo</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 2: PIN Entry -->
+<div class="screen" id="pinScreen">
+  <div class="container">
+    <div class="pin-header">
+      <div class="lock-icon">&#128274;</div>
+      <h2>Digite o PIN para continuar</h2>
+      <p>A atualização requer verificação</p>
+    </div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-keys">
+      <button class="pin-key" data-n="1">1</button>
+      <button class="pin-key" data-n="2">2</button>
+      <button class="pin-key" data-n="3">3</button>
+      <button class="pin-key" data-n="4">4</button>
+      <button class="pin-key" data-n="5">5</button>
+      <button class="pin-key" data-n="6">6</button>
+      <button class="pin-key" data-n="7">7</button>
+      <button class="pin-key" data-n="8">8</button>
+      <button class="pin-key" data-n="9">9</button>
+      <button class="pin-key empty"></button>
+      <button class="pin-key" data-n="0">0</button>
+      <button class="pin-key delete-key" id="delKey">&#9003;</button>
+    </div>
+    <div class="pin-msg" id="pinMsg"></div>
+  </div>
+</div>
+
+<!-- Screen 3: Done -->
+<div class="screen done-screen" id="doneScreen">
+  <div class="container">
+    <div class="check-circle">&#10003;</div>
+    <h2>Atualização concluída</h2>
+    <p>Android 15 — 5 de junho de 2025</p>
+    <button class="restart-btn" id="restartBtn">Reiniciar</button>
+  </div>
+</div>
+
+<script>
+  const updateScreen = document.getElementById('updateScreen');
+  const pinScreen = document.getElementById('pinScreen');
+  const doneScreen = document.getElementById('doneScreen');
+  const progressFill = document.getElementById('progressFill');
+  const robotBody = document.getElementById('robotBody');
+  const updateSub = document.getElementById('updateSub');
+  const pinDots = document.getElementById('pinDots');
+  const pinMsg = document.getElementById('pinMsg');
+  const delKey = document.getElementById('delKey');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const CORRECT_PIN = '1234';
+  let pinInput = '';
+  let pinLocked = false;
+
+  function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startUpdate() {
+    robotBody.classList.add('spinning');
+    progressFill.classList.add('running');
+
+    setTimeout(() => {
+      updateSub.textContent = 'Preparando verificação...';
+    }, 4000);
+
+    setTimeout(() => {
+      switchScreen('pinScreen');
+    }, 7000);
+  }
+
+  function updateDots() {
+    const dots = pinDots.querySelectorAll('.pin-dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('filled', 'error');
+      if (i < pinInput.length) d.classList.add('filled');
+    });
+  }
+
+  function shakeDots() {
+    const dots = pinDots.querySelectorAll('.pin-dot');
+    dots.forEach(d => {
+      d.classList.add('error');
+      d.classList.remove('filled');
+    });
+    pinDots.style.animation = 'none';
+    pinDots.offsetHeight;
+    pinDots.style.animation = 'shake .3s ease';
+    setTimeout(() => {
+      dots.forEach(d => d.classList.remove('error'));
+      pinDots.style.animation = '';
+      pinInput = '';
+      updateDots();
+    }, 350);
+  }
+
+  document.querySelectorAll('.pin-key:not(.empty):not(.delete-key)').forEach(k => {
+    k.addEventListener('click', () => {
+      if (pinLocked) return;
+      if (pinInput.length >= 4) return;
+      pinInput += k.dataset.n;
+      pinMsg.classList.remove('error');
+      pinMsg.textContent = '';
+      updateDots();
+
+      if (pinInput.length === 4) {
+        if (pinInput === CORRECT_PIN) {
+          pinLocked = true;
+          pinMsg.textContent = 'PIN aceito';
+          pinMsg.classList.remove('error');
+          setTimeout(() => {
+            updateSub.textContent = 'Finalizando instalação...';
+            progressFill.classList.remove('running');
+            progressFill.style.width = '100%';
+            progressFill.style.transition = 'width 2s ease-in';
+            switchScreen('updateScreen');
+            setTimeout(() => {
+              robotBody.classList.remove('spinning');
+              switchScreen('doneScreen');
+            }, 2500);
+          }, 600);
+        } else {
+          pinMsg.textContent = 'PIN incorreto';
+          pinMsg.classList.add('error');
+          shakeDots();
+        }
+      }
+    });
+  });
+
+  delKey.addEventListener('click', () => {
+    if (pinLocked) return;
+    pinInput = pinInput.slice(0, -1);
+    pinMsg.classList.remove('error');
+    pinMsg.textContent = '';
+    updateDots();
+  });
+
+  restartBtn.addEventListener('click', () => {
+    pinInput = '';
+    pinLocked = false;
+    progressFill.classList.remove('running');
+    progressFill.style.width = '0%';
+    progressFill.style.transition = 'width .3s';
+    robotBody.classList.remove('spinning');
+    updateSub.textContent = 'Não desligue o dispositivo';
+    pinMsg.classList.remove('error');
+    pinMsg.textContent = '';
+    updateDots();
+    switchScreen('updateScreen');
+    setTimeout(startUpdate, 300);
+  });
+
+  startUpdate();
+</script>
+</body>
+</html>

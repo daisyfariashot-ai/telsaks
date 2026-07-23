@@ -1,0 +1,1059 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Google Sans", Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(0, 0, 0);
+  background-color: rgb(255, 255, 255);
+  line-height: 14px;
+  letter-spacing: normal;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: rgb(95, 99, 104);
+  font-size: 14px;
+}
+
+.top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: none;
+}
+
+.play-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.play-icon-svg { width: 24px; height: 24px; }
+
+.play-logo-text {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.header-actions .icon-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgb(95, 99, 104);
+  flex-shrink: 0;
+}
+
+.header-actions .icon-btn svg { width: 24px; height: 24px; }
+
+.bottom-nav {
+  height: 48px;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid rgb(218, 220, 224);
+  width: 100%;
+  margin-left: -24px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.bottom-nav .nav-tab {
+  height: 48px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.bottom-nav .nav-tab.active {
+  color: rgb(1, 135, 95);
+}
+
+.bottom-nav .nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  height: 2px;
+  background-color: rgb(1, 135, 95);
+}
+
+main {
+  padding-top: 104px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.app-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.app-icon-large {
+  width: 180px;
+  height: auto;
+  border-radius: 20%;
+  box-shadow: 0px 1px 2px 0px rgba(60,64,67,0.3), 0px 1px 3px 1px rgba(60,64,67,0.15);
+  margin-bottom: 16px;
+  display: inline;
+  border: none;
+}
+
+.app-title-h1 {
+  font-size: 24px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 32px;
+  letter-spacing: normal;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.app-developer-link {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(1, 135, 95);
+  line-height: 24px;
+  letter-spacing: 0.1px;
+  display: inline;
+  text-decoration: none;
+}
+
+.app-badge {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  display: block;
+  margin-top: 4px;
+}
+
+.rating-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  text-align: center;
+}
+
+.rating-number {
+  font-size: 56px;
+  font-weight: 400;
+  font-family: "Google Sans Display", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 64px;
+  letter-spacing: normal;
+  display: block;
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.rating-star-svg {
+  display: block;
+}
+
+.rating-reviews {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.rating-label {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.install-btn-wrapper {
+  padding: 6px 0;
+}
+
+.btn-install {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(255, 255, 255);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  background-color: rgb(1, 135, 95);
+  padding: 8px 16px;
+  margin: 6px 0;
+  border-radius: 8px;
+  width: 100%;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.btn-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgb(95, 99, 104);
+}
+
+.btn-circle:hover { background-color: rgba(0,0,0,0.04); }
+
+.btn-circle svg { width: 24px; height: 24px; fill: currentColor; }
+
+.screenshots-wrapper {
+  margin: 24px 0;
+}
+
+.screenshots-scroll {
+  overflow-x: scroll;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.screenshots-scroll::-webkit-scrollbar { display: none; }
+
+.screenshots-scroll img {
+  height: 250px;
+  width: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.05);
+  flex-shrink: 0;
+}
+
+.device-tabs {
+  display: flex;
+  border-bottom: 1px solid rgb(218, 220, 224);
+  margin: 0 -24px;
+  padding: 0 24px;
+}
+
+.device-tab {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 64px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+
+.device-tab.active {
+  color: rgb(1, 135, 95);
+  border-bottom: 2px solid rgb(1, 135, 95);
+}
+
+.section-heading {
+  font-size: 18px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 24px;
+  letter-spacing: normal;
+  display: flex;
+  align-items: center;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 12px;
+}
+
+.section-header-row .more-link {
+  color: rgb(1, 135, 95);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.section-header-row .more-link svg { width: 20px; height: 20px; fill: currentColor; }
+
+.about-text { padding-bottom: 12px; }
+
+.about-text .about-date {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  display: block;
+  margin-top: 4px;
+}
+
+.about-text .about-updated-label {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  display: block;
+  margin-top: 16px;
+}
+
+.about-section-heading {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  display: block;
+  margin: 16px 0 8px;
+}
+
+.about-section-subheading {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  display: block;
+  margin: 12px 0 4px;
+}
+
+.about-text p {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.chips-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0 16px;
+}
+
+.chip {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.15px;
+  height: 32px;
+  border-radius: 16px;
+  padding: 0 12px;
+  border: 1px solid rgb(218, 220, 224);
+  background-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.events-scroll {
+  overflow-x: scroll;
+  display: flex;
+  gap: 12px;
+  padding: 8px 0 24px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.events-scroll::-webkit-scrollbar { display: none; }
+
+.event-card {
+  width: 280px;
+  border-radius: 8px;
+  background-color: rgb(248, 249, 250);
+  box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.event-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.event-card .event-body { padding: 12px; }
+
+.event-card .event-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgb(1, 135, 95);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.event-card .event-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(32, 33, 36);
+}
+
+.safety-description {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  padding: 8px 0;
+}
+
+.safety-items { padding: 8px 0; }
+
+.safety-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.safety-item .safety-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.safety-item .safety-icon svg { width: 20px; height: 20px; fill: rgb(95, 99, 104); }
+
+.safety-item .safety-label {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 20px;
+  flex: 1;
+}
+
+.safety-item .safety-detail {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+
+.more-details-link {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(1, 135, 95);
+  line-height: 20px;
+  display: inline-block;
+  margin-top: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.verified-badge {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+  cursor: pointer;
+}
+
+.support-detail {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+
+.support-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+}
+
+.support-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.support-left .support-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgb(248, 249, 250);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(95, 99, 104);
+}
+
+.support-left .support-icon svg { width: 24px; height: 24px; fill: currentColor; }
+
+.support-left .support-label {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+}
+
+.support-right .btn-open {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(95, 99, 104);
+}
+
+.support-right .btn-open svg { width: 24px; height: 24px; fill: currentColor; }
+
+.ratings-container {
+  display: flex;
+  gap: 24px;
+  padding: 16px 0;
+  align-items: flex-start;
+}
+
+.rating-left { text-align: center; min-width: 80px; }
+
+.rating-left .big-num {
+  font-size: 56px;
+  font-weight: 400;
+  font-family: "Google Sans Display", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 64px;
+}
+
+.rating-left .stars {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.rating-left .stars svg { width: 16px; height: 16px; }
+.rating-left .stars .star-filled { fill: rgb(32, 33, 36); }
+.rating-left .stars .star-empty { fill: rgb(218, 220, 224); }
+
+.rating-left .total-reviews {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  margin-top: 4px;
+}
+
+.rating-bars { flex: 1; }
+
+.rating-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rating-bar-row .bar-label {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  width: 16px;
+  text-align: right;
+}
+
+.rating-bar-row .bar-track {
+  flex: 1;
+  height: 4px;
+  background-color: rgb(232, 234, 237);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.rating-bar-row .bar-fill {
+  height: 100%;
+  background-color: rgb(234, 134, 0);
+  border-radius: 2px;
+}
+
+.rating-bar-row .bar-count {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  width: 60px;
+  text-align: right;
+}
+
+.review-item {
+  padding: 16px 0;
+  border-top: 1px solid rgb(218, 220, 224);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+
+.review-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgb(232, 234, 237);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.review-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.review-author {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+}
+
+.review-date {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+}
+
+.review-stars {
+  display: flex;
+  gap: 1px;
+  margin-left: auto;
+}
+
+.review-stars svg { width: 14px; height: 14px; }
+.review-stars .star-filled { fill: rgb(32, 33, 36); }
+.review-stars .star-empty { fill: rgb(218, 220, 224); }
+
+.review-text {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  margin-top: 8px;
+}
+
+.review-helpful {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+}
+
+.review-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.review-actions .action-label {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+}
+
+.review-actions .btn-sim-nao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  height: 32px;
+  border-radius: 16px;
+  border: 1px solid rgb(218, 220, 224);
+  background-color: transparent;
+  cursor: pointer;
+  color: rgb(95, 99, 104);
+  font-weight: 500;
+  font-size: 14px;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  line-height: 10px;
+  letter-spacing: 0.25px;
+  gap: 8px;
+  margin: 4px;
+}
+
+.review-actions .btn-sim-nao:hover { background-color: rgba(0,0,0,0.04); }
+
+.view-all-reviews {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(1, 135, 95);
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
+  cursor: pointer;
+  border-top: 1px solid rgb(218, 220, 224);
+  text-decoration: none;
+}
+
+.whatsnew-text {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  margin-top: 12px;
+  white-space: pre-line;
+}
+
+.content-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.content-rating-icon { width: 48px; height: 48px; flex-shrink: 0; }
+
+.content-rating-label {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 20px;
+}
+
+.content-rating-detail {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+  letter-spacing: 0.3px;
+}
+
+.learn-more-link {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(1, 135, 95);
+  cursor: pointer;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.games-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: scroll;
+  padding: 8px 0 24px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.games-scroll::-webkit-scrollbar { display: none; }
+
+.game-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 240px;
+  height: 80px;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background-color: rgb(248, 249, 250);
+  border: 1px solid rgb(218, 220, 224);
+  text-decoration: none;
+  color: rgb(95, 99, 104);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.game-card img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.game-card .game-info { flex: 1; min-width: 0; }
+
+.game-card .game-title {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-card .game-developer {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 16px;
+}
+
+.game-card .game-rating {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: Roboto, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.game-card .game-rating svg { width: 12px; height: 12px; fill: rgb(234, 134, 0); }
+
+.flag-inappropriate {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Google Sans", Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  text-decoration: none;
+  cursor: pointer;
+  border-top: 1px solid rgb(218, 220, 224);
+  margin: 0 -24px;
+}
+
+.flag-inappropriate:hover { background-color: rgba(0,0,0,0.02); }
+
+footer {
+  padding: 24px;
+  margin-top: 12px;
+}
+
+footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+footer .footer-links a {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Google Sans", Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(0, 0, 0);
+  line-height: 14px;
+  text-decoration: none;
+  display: block;
+  padding: 8px 0;
+}
+
+footer .footer-section { margin-bottom: 16px; }
+
+footer .footer-title {
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  color: rgb(32, 33, 36);
+  margin-bottom: 8px;
+}
+
+footer .divider {
+  border: none;
+  border-top: 1px solid rgb(218, 220, 224);
+  margin: 16px 0;
+}
+
+footer .footer-tribute {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  margin: 16px 0;
+}
+
+footer .footer-country {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 32px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: rgb(95, 99, 104);
+}
+
+footer .footer-country svg { width: 16px; height: 16px; fill: rgb(95, 99, 104); flex-shrink: 0; }
+
+.section-divider {
+  border: none;
+  border-top: 1px solid rgb(218, 220, 224);
+  margin: 0 -24px;
+}
+
+@media (min-width: 481px) {
+  body {
+    border-left: 1px solid rgb(218, 220, 224);
+    border-right: 1px solid rgb(218, 220, 224);
+  }
+}

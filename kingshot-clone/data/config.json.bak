@@ -1,0 +1,326 @@
+{
+  "header": {
+    "logo": "https://www.gstatic.com/android/market_images/web/play_prism/harmony/play_logo_2x.png",
+    "title": "Google Play"
+  },
+  "app": {
+    "icon": "https://play-lh.googleusercontent.com/Oi-uI4VdPpu3zKvLpQV3pCqMpGj_MXxWnFnB0l-dCx8upXfNzJ2jWAKiFPW-Gf5GLQ=w240-h480",
+    "title": "Kingshot",
+    "developer": "Century Games PTE. LTD.",
+    "developerUrl": "https://play.google.com/store/apps/dev?id=6832375891198423999",
+    "badge": "Compras no app",
+    "rating": "4,8",
+    "reviews": "1,4 mi avaliações",
+    "downloads": "10 mi+",
+    "updated": "16 de jun. de 2026",
+    "size": "",
+    "installCount": ""
+  },
+  "screenshots": [
+    "https://play-lh.googleusercontent.com/GvU4TO3tC-kQC8LQh8_UZ71C6L7ldngrsHnw7uxsMvBmIPAMg1aJGKOF5NX7FM3GqQ=w526-h296",
+    "https://play-lh.googleusercontent.com/6MLV9_5ft8x3CDNLLJ6QRMWqMLdQvY4vG4lApPqtKTvK0Hn4jFP04XMF1FfRJD3K8AI=w526-h296",
+    "https://play-lh.googleusercontent.com/9CkzORqkZHg9WDS2A0k7UO6ndQxqJMMD_fqI4hSlCQq9FM2r0b8ZnJ3xQ2JRRGRRlQ=w526-h296",
+    "https://play-lh.googleusercontent.com/3ZzPOKlGRF8sWG_XbPM3SK73D-DPCpIdj8OAr7aBiA0VlsQ79lF9n0AvA1FhthI1iJw=w526-h296",
+    "https://play-lh.googleusercontent.com/gf8a8Wtahmj3CEfGfYtd_KSL0GWdAjqUGBV0gVqJmH9TEr8y9MFKEzgj9iLs5Atn4Jo=w526-h296"
+  ],
+  "about": {
+    "title": "Sobre este jogo",
+    "sections": [
+      {
+        "type": "text",
+        "content": "Kingshot é um inovador jogo de sobrevivência medieval Idle que combina jogabilidade estratégica com ricos detalhes esperando para serem explorados."
+      },
+      {
+        "type": "text",
+        "content": "Quando uma rebelião repentina altera o destino de uma dinastia inteira e inicia uma guerra devastadora, inúmeras pessoas perdem suas casas. Num mundo repleto de colapso social, invasões rebeldes, doenças desenfreadas e multidões desesperadas por recursos, a sobrevivência é o desafio final. Como governador nestes tempos turbulentos, cabe a você liderar o seu povo através destas adversidades, elaborando estratégias internas e diplomáticas para reacender a centelha da civilização."
+      },
+      {
+        "type": "heading",
+        "content": "[Recursos Principais]"
+      },
+      {
+        "type": "subheading",
+        "content": "Se Defenda contra Invasões"
+      },
+      {
+        "type": "text",
+        "content": "Fique atento e pronto para repelir invasões a qualquer momento. Sua cidade, o último bastião da esperança, depende disso. Reúna recursos, melhore suas defesas e se prepare para a batalha para garantir a sobrevivência nestes tempos difíceis."
+      },
+      {
+        "type": "subheading",
+        "content": "Gerenciar Recursos Humanos"
+      },
+      {
+        "type": "text",
+        "content": "Desfrute de uma mecânica de jogo única que envolve a atribuição de funções de sobreviventes, como trabalhadores, caçadores e chefs. Monitore sua vida e felicidade para garantir que permaneçam produtivos. Responda rapidamente à doença para garantir que todos recebam tratamento oportuno."
+      },
+      {
+        "type": "subheading",
+        "content": "Estabelecer Leis"
+      },
+      {
+        "type": "text",
+        "content": "Os códigos de lei são vitais para sustentar a civilização e são cruciais para o crescimento e a força da sua cidade."
+      },
+      {
+        "type": "heading",
+        "content": "[Jogabilidade Estratégica]"
+      },
+      {
+        "type": "subheading",
+        "content": "Luta por Recursos"
+      },
+      {
+        "type": "text",
+        "content": "No meio do súbito colapso do Estado, o continente é inundado com recursos inexplorados. Refugiados, rebeldes e governadores sedentos de poder estão todos de olho nestes materiais preciosos. Se prepare para a batalha e use todas as estratégias à sua disposição para proteger esses recursos!"
+      },
+      {
+        "type": "subheading",
+        "content": "Batalha pelo Poder"
+      },
+      {
+        "type": "text",
+        "content": "Competir contra outros jogadores pela honra de se tornar o governador mais forte neste grande jogo de estratégia. Reivindique o trono e reine supremo!"
+      },
+      {
+        "type": "subheading",
+        "content": "Forjar Alianças"
+      },
+      {
+        "type": "text",
+        "content": "Alivie o fardo da sobrevivência neste mundo caótico formando ou se juntando a uma aliança. Colabore com aliados para reconstruir a civilização!"
+      },
+      {
+        "type": "subheading",
+        "content": "Recrute Heróis"
+      },
+      {
+        "type": "text",
+        "content": "O jogo apresenta uma lista de heróis únicos, cada um esperando para ser recrutado. Reunir heróis com diversos talentos e habilidades é essencial para tomar a iniciativa e garantir a segurança nestes tempos desesperadores."
+      },
+      {
+        "type": "subheading",
+        "content": "Competir com outros Governadores"
+      },
+      {
+        "type": "text",
+        "content": "Aprimore as habilidades de seus heróis, reúna seus esquadrões e desafie outros governadores. A vitória não só lhe dá pontos valiosos, mas também concede acesso a itens raros. Leve sua cidade ao topo do ranking e mostre a ascensão de uma grande civilização."
+      },
+      {
+        "type": "subheading",
+        "content": "Tecnologia Avançada"
+      },
+      {
+        "type": "text",
+        "content": "Com a rebelião destruindo quase todos os avanços tecnológicos, é crucial começar a reconstruir e recuperar os fragmentos de tecnologia perdida. A corrida para dominar a tecnologia de ponta poderá determinar o dominador desta nova ordem mundial!"
+      },
+      {
+        "type": "heading",
+        "content": "[Fique Conectado]"
+      },
+      {
+        "type": "text",
+        "content": "Discord: https://discord.com/invite/5cYPN24ftf"
+      }
+    ]
+  },
+  "categories": [
+    "#1 mais rentáveis estratégia",
+    "Estratégia",
+    "Defesa de torre",
+    "Um jogador",
+    "Estilizado",
+    "Fantasia",
+    "Fantasia medieval",
+    "Imersivo"
+  ],
+  "dataSafety": {
+    "title": "Segurança dos dados",
+    "description": "Sua segurança começa quando você entende como os desenvolvedores coletam e compartilham seus dados. As práticas de segurança e privacidade de dados podem variar de acordo com o uso, a região e a idade. O desenvolvedor forneceu as informações a seguir, que podem ser atualizadas ao longo do tempo.",
+    "items": [
+      {
+        "icon": "share",
+        "label": "Este app pode compartilhar estes tipos de dados com terceiros",
+        "detail": "Informações pessoais"
+      },
+      {
+        "icon": "collect",
+        "label": "Este app pode coletar estes tipos de dados",
+        "detail": "Local, Informações financeiras e mais 3"
+      },
+      {
+        "icon": "encrypted",
+        "label": "Os dados são criptografados em trânsito",
+        "detail": ""
+      },
+      {
+        "icon": "nodelete",
+        "label": "Não é possível excluir os dados",
+        "detail": ""
+      }
+    ]
+  },
+  "appSupport": {
+    "label": "E-mail",
+    "detail": "kingshot@centurygames.com"
+  },
+  "reviews": {
+    "title": "Classificações e resenhas",
+    "rating": "4,8",
+    "totalReviews": "1,34 mi avaliações",
+    "stars": {
+      "1": "19.709",
+      "2": "8.953",
+      "3": "28.581",
+      "4": "107.627",
+      "5": "1.178.479"
+    },
+    "items": [
+      {
+        "name": "Vitor Emanuel",
+        "avatar": "",
+        "stars": 4,
+        "date": "7 de junho de 2026",
+        "text": "o jogo é divertido, é um mistura de Clash of clans com Royale e jogos desse estilo que nasceu esse jogo aqui, mas tem algumas críticas a serem feitas. Eventos repetitivos, os eventos são bons, mas parece que se repetem sempre, seria bom inovar nisso; os heróis que precisam melhorar gastando dinheiro. Eu sei que o jogo precisa lucrar, mas poderia ao menos dar um pouco de fragmento de herói lendário já desbloqueado, nem que fosse um pouco. Além mais, o tempo, se não arrumem isso, o jogo será chato",
+        "helpful": 1
+      },
+      {
+        "name": "Por Do Sol",
+        "avatar": "",
+        "stars": 5,
+        "date": "18 de maio de 2026",
+        "text": "Gostei bastante do formato do jogo, a forma como ele funciona, realmente, por enquanto, não tem anuncios durante a jogatina. Achei bem legal a forma como podemos ir aprimorando cada mínimo detalhe, como é fácil de entender, a história, a animação, as vozes, etc. Acho que seria legal colocar ataques de animais durante a noite, assim faz com que coisas novas acontecem, eu não sei se tem isso mais para frente, porém por enquanto não teve.",
+        "helpful": 11
+      },
+      {
+        "name": "Lucas",
+        "avatar": "",
+        "stars": 4,
+        "date": "27 de abril de 2026",
+        "text": "Estou jogando a mais de 1 mês e minhas conclusões são as seguintes; Realmente o jogo não é parecido com o anúncio, ele é bem complexo, mas divertido quando você pega o jeito. Ele é um jogo que obviamente se você comprar pacotes vai desenvolver sua cidade mais rápido, porém dá pra jogar sem comprar nada. Tem bastante guerra, eventos, disputa de aliança, eventos... Acho que o jogo poderia melhorar em alguns pontos, mas em si é um 8/10.",
+        "helpful": 16
+      }
+    ]
+  },
+  "whatsNew": {
+    "title": "O que há de novo",
+    "content": "[Novo Conteúdo]\n1. Novo recurso: Sistema Mestre — Quinn parte para mais uma aventura! Aceite missões do Governador e enfrente todos os tipos de desafios em uma jornada pela Terra Maligna, buscando Mestres que possam ajudar a construir e desenvolver sua Cidade.(Desbloqueia após o seu Reino atingir o progresso necessário.)"
+  },
+  "contentRating": {
+    "label": "Classificação Livre",
+    "details": "Usuários Interagem, Compras no Jogo"
+  },
+  "events": {
+    "title": "Eventos e ofertas",
+    "items": [
+      {
+        "image": "https://play-lh.googleusercontent.com/PL3S7o6n_n0WuDlCgqCG8MR1E0QqhQlqYQcH2wrPK-H6wvY6qHU-1hZGk3WJ5_gAk7M=w256-h256",
+        "label": "Termina em 4 dias",
+        "name": "Loja da Aventura"
+      }
+    ]
+  },
+  "developerMore": {
+    "title": "Mais de Century Games PTE. LTD.",
+    "games": [
+      {
+        "icon": "https://play-lh.googleusercontent.com/XsP4AFeBFpN4BMxY8AmjKokQ-YFDS56vA2CJgUJCLtCNqGv3tSxpEql4Im0xYZRRNgg=w256-h256",
+        "title": "Truck Star Match",
+        "developer": "Century Games PTE. LTD.",
+        "rating": "4,7"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/KrSqAiL2QmF6dmOjLx7OrYCV9vhfi5tB8QF2nR-ZGxCK6BjKJQUyKkSy8AphJgQ91w=w256-h256",
+        "title": "Whiteout Survival",
+        "developer": "Century Games PTE. LTD.",
+        "rating": "4,5"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/1KkuohqXjJ3M2FtXk0CDKAEIIJg1HTwArAHA6SBIHKjTGlxbflPvjQaUf_qT_y6G3g=w256-h256",
+        "title": "Tasty Travels: Merge Game",
+        "developer": "Century Games PTE. LTD.",
+        "rating": "4,8"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/dMsGH6WPBpW6vQq_czC4DJ5SPnFnFMLT6KvfXdBPCX5vIFJX4rjlFmm9-5nSTjDn0Q=w256-h256",
+        "title": "Livetopia: Party!",
+        "developer": "Century Games PTE. LTD.",
+        "rating": "4,2"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/gIhhW2E5c-WyZ5Pc70iR2z19a6rQj3r_xw34my9nq__7TTxqa_ZxqF1y7h9LJ7vVJQ=w256-h256",
+        "title": "Fazenda Feliz Pocket",
+        "developer": "Century Games PTE. LTD.",
+        "rating": "4,6"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/rDhe4PJT1D3gH7SJQn3N5yzZ9k5PbcG0-4c2Hs8aXj9m0xGJzKk7Q9vYXGdHf8d7LQ=w256-h256",
+        "title": "Family Farm Adventure",
+        "developer": "Century Games PTE. LTD.",
+        "rating": "4,5"
+      }
+    ]
+  },
+  "similarGames": {
+    "title": "Jogos semelhantes",
+    "games": [
+      {
+        "icon": "https://play-lh.googleusercontent.com/Hh0y9iMgQ4V08AVZtP5BwQCxQAUJ4nf6MFJ_1p0_ZuLD-L8BdiXwRsGW4Cxo6yZFsOU=w256-h256",
+        "title": "Top Heroes",
+        "developer": "RiverGame",
+        "rating": "4,8"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/vYX7a_YIlsyL2bBcSw2O60DQ8Xy68B2JN_Wp72hxQ9TEHq2e2gYv_ZjRbBK6PpCXKQ=w256-h256",
+        "title": "Fundação: Fronteira Galáctica",
+        "developer": "FunPlus International AG",
+        "rating": "4,6"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/gIhhW2E5c-WyZ5Pc70iR2z19a6rQj3r_xw34my9nq__7TTxqa_ZxqF1y7h9LJ7vVJQ=w256-h256",
+        "title": "Viking Rise",
+        "developer": "IGG.COM",
+        "rating": "4,8"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/3N4DFCgWv80KQcOFXhNZzYcjn1vLGuXvFgDQ-OJ0GR5mZ2dN1JYXHf6SXEf91twEPw=w256-h256",
+        "title": "Last Asylum: Plague",
+        "developer": "37GAMES GLOBAL",
+        "rating": "4,9"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/0kE8X9m4n3P2R7tY5w6Q8s1A2b3C4d5E6f7G8h9J0kL1m2N3o4P5q6R7s8T9u0V=w256-h256",
+        "title": "Rise of Castles",
+        "developer": "Firecraft Studios",
+        "rating": "4,6"
+      },
+      {
+        "icon": "https://play-lh.googleusercontent.com/9s8T7u6V5w4X3z2Y1a0B9c8D7e6F5g4H3j2K1l0M9n8O7p6Q5r4S3t2U1v0W=w256-h256",
+        "title": "Palmon Survival",
+        "developer": "FTT Games",
+        "rating": "4,5"
+      }
+    ]
+  },
+  "footer": {
+    "links": [
+      "Play Pass",
+      "Pontos do Play Points",
+      "Vales-presente",
+      "Resgatar",
+      "Política de reembolso"
+    ],
+    "family": [
+      "Guia para a família",
+      "Compartilhamento em família"
+    ],
+    "legal": [
+      "Termos de Serviço",
+      "Privacidade",
+      "Sobre o Google Play",
+      "Desenvolvedores",
+      "Google Store"
+    ],
+    "country": "Brasil (Português (Brasil))"
+  }
+}
