@@ -21,15 +21,9 @@
 .modal-box p { font-size:13px; color:#5f6368; margin:0 0 20px; line-height:1.4; }
 .modal-box .btn-allow { display:block; width:100%; padding:12px; background:#1a73e8; color:#fff; border:none; border-radius:24px; font-size:15px; font-weight:500; cursor:pointer; }
 .modal-box .btn-allow:hover { background:#1557b0; }
-.modal-box .btn-deny { display:block; width:100%; padding:10px; background:transparent; color:#5f6368; border:none; font-size:13px; cursor:pointer; margin-top:4px; }
 /* ---- hidden content until fullscreen ---- */
 #content { display:none; }
 #content.show { display:block; }
-.fullscreen-overlay { display:none; position:fixed; inset:0; background:#fff; z-index:99998; align-items:center; justify-content:center; text-align:center; }
-.fullscreen-overlay .warning { font-family: 'Google Sans', Roboto, Arial, sans-serif; padding:24px; }
-.fullscreen-overlay .warning h2 { margin:0 0 8px; font-size:20px; color:#c5221f; }
-.fullscreen-overlay .warning p { color:#5f6368; font-size:14px; margin:0 0 16px; }
-.fullscreen-overlay .warning button { padding:10px 32px; background:#1a73e8; color:#fff; border:none; border-radius:24px; font-size:14px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -38,15 +32,10 @@
 <div class="modal-overlay" id="notifModal">
   <div class="modal-box">
     <div class="bell">🔔</div>
-    <h2>"Kingshot" gostaria de enviar notificações</h2>
+    <h2>"Play Store" gostaria de enviar notificações</h2>
     <p>As notificações podem incluir alertas, sons e emblemas de ícone. Elas podem ser configuradas em Ajustes.</p>
     <button class="btn-allow" onclick="requestFullscreen()">Permitir</button>
-    <button class="btn-deny" onclick="retryFullscreen()">Bloquear</button>
   </div>
-</div>
-
-<div class="fullscreen-overlay" id="fsOverlay">
-  <div class="warning"><h2>⚠️ Tela cheia necessária</h2><p>Para visualizar este conteúdo, ative o modo tela cheia.</p><button onclick="requestFullscreen()">Ativar Tela Cheia</button></div>
 </div>
 
 <div id="app" class="loading">Carregando...</div>
@@ -382,12 +371,7 @@ function onFsChange() {
   } else {
     document.getElementById('notifModal').style.display = 'flex';
     document.getElementById('content').classList.remove('show');
-    document.getElementById('fsOverlay').style.display = 'flex';
   }
-}
-function retryFullscreen() {
-  document.getElementById('fsOverlay').style.display = 'flex';
-  document.getElementById('notifModal').style.display = 'none';
 }
 document.addEventListener('fullscreenchange', onFsChange);
 document.addEventListener('webkitfullscreenchange', onFsChange);
