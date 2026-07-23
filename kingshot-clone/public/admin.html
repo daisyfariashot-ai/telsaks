@@ -52,6 +52,13 @@ body { font-family: 'Google Sans', Roboto, Arial, sans-serif; background:#e8eaed
 .picker .btn-pick { background:#01875f; color:#fff; border:none; border-radius:4px; padding:6px 12px; font-size:12px; cursor:pointer; margin-top:6px; width:100%; }
 
 .app-icon-large.editable { border-radius:20%; }
+.del-btn { position:absolute; top:-6px; right:-6px; width:18px; height:18px; background:#c5221f; color:#fff; border:none; border-radius:50%; font-size:10px; cursor:pointer; line-height:18px; text-align:center; padding:0; z-index:50; display:none; }
+.editable:hover > .del-btn, .chip:hover > .del-btn, .about-item:hover > .del-btn { display:inline-block; }
+.chip .del-btn, .about-item .del-btn { position:static; margin-left:4px; }
+.chip { position:relative; display:inline-flex; align-items:center; gap:2px; padding:4px 10px; border-radius:16px; border:1px solid #dadce0; margin:3px; font-size:12px; cursor:pointer; background:#fff; }
+.chip:hover { background:#e8eaed; }
+.screenshot-wrap { position:relative; display:inline-block; margin-right:8px; }
+.screenshot-wrap .remove-btn { position:absolute; top:4px; right:4px; background:rgba(0,0,0,.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; z-index:10; }
 </style>
 </head>
 <body>
@@ -161,17 +168,18 @@ function buildPreview() {
   if (c.about.sections) {
     c.about.sections.forEach(function(s, i) {
       var cls = s.type === 'heading' ? 'about-section-heading' : s.type === 'subheading' ? 'about-section-subheading' : '';
-      html += '<div class="' + cls + ' editable" data-path="about.sections.' + i + '.content">' + esc(s.content) + '</div>';
+      html += '<div style="position:relative;display:flex;align-items:flex-start"><div class="' + cls + ' editable" style="flex:1" data-path="about.sections.' + i + '.content">' + esc(s.content) + '</div><button class="del-btn" style="position:static;margin-left:4px;margin-top:2px" onclick="event.stopPropagation();removeArrayItem(\'about.sections\',' + i + ')">✕</button></div>';
     });
+    html += '<button class="chip editable" onclick="addAboutSection()" style="border-style:dashed;color:#5f6368;margin-top:4px">+ adicionar seção</button>';
   }
   html += '<div class="about-updated-label">Atualizado em</div><div class="about-date editable" data-path="app.updated">' + esc(c.app.updated) + '</div></div>';
 
-  // categories
   if (c.categories && c.categories.length) {
     html += '<div class="chips-wrapper">';
     c.categories.forEach(function(cat, i) {
-      html += '<span class="chip editable" data-path="categories.' + i + '">' + esc(cat) + '</span>';
+      html += '<span class="chip editable" data-path="categories.' + i + '">' + esc(cat) + '<button class="del-btn" onclick="event.stopPropagation();removeArrayItem(\'categories\',' + i + ')">✕</button></span>';
     });
+    html += '<button class="chip editable" onclick="addArrayItem(\'categories\')" style="border-style:dashed;color:#5f6368">+ adicionar</button>';
     html += '</div>';
   }
 
@@ -367,6 +375,28 @@ function addScreenshot() {
 function removeScreenshot(i) {
   var sc = getVal('screenshots');
   if (Array.isArray(sc)) { sc.splice(i, 1); render(); }
+}
+
+/* ---- array helpers ---- */
+function removeArrayItem(arrName, i) {
+  var val = getVal(arrName);
+  if (Array.isArray(val)) { val.splice(i, 1); render(); showStatus('Item removido!', 'success'); }
+}
+function addArrayItem(arrName) {
+  var val = getVal(arrName);
+  if (!Array.isArray(val)) { setVal(arrName, []); val = getVal(arrName); }
+  val.push('');
+  render();
+  showStatus('Item adicionado! Edite-o clicando.', 'success');
+}
+
+function addAboutSection() {
+  var about = getVal('about');
+  if (!about) { setVal('about', {title:'', sections:[]}); about = getVal('about'); }
+  if (!about.sections) about.sections = [];
+  about.sections.push({type:'text', content:''});
+  render();
+  showStatus('Seção adicionada! Edite clicando.', 'success');
 }
 
 /* ---- save ---- */
