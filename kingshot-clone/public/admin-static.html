@@ -404,7 +404,6 @@ document.getElementById('saveTokenBtn').addEventListener('click', function() {
   showStatus('Token salvo no navegador.', 'success');
 });
 
-// Load saved token
 var savedToken = getToken();
 if (savedToken) document.getElementById('ghToken').value = savedToken;
 
