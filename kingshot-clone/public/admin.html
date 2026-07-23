@@ -339,14 +339,29 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function parseConfigsFromHTML(html) {
+  var marker = 'var CONFIGS = ';
+  var start = html.indexOf(marker);
+  if (start === -1) return null;
+  var pos = start + marker.length;
+  var braceCount = 0, first = false;
+  while (pos < html.length) {
+    if (html[pos] === '{') { braceCount++; first = true; }
+    else if (html[pos] === '}') { braceCount--; }
+    if (first && braceCount === 0) break;
+    pos++;
+  }
+  try { return JSON.parse(html.slice(start + marker.length, pos + 1)); } catch(e) { return null; }
+}
+
 /* ---- init ---- */
 (function init() {
   var saved = localStorage.getItem('playstore_configs');
   if (saved) { try { CONFIGS = JSON.parse(saved); } catch(e) {} }
   if (!CONFIGS) {
     fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
-      var m = html.match(/var CONFIGS = (\{[\s\S]*?\});\s*\n/);
-      if (m) { CONFIGS = JSON.parse(m[1]); render(); }
+      var parsed = parseConfigsFromHTML(html);
+      if (parsed) { CONFIGS = parsed; render(); }
     });
     return;
   }

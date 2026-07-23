@@ -36,15 +36,33 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   res.json({ url: '/uploads/' + req.file.filename });
 });
 
+function replaceConfigsInHTML(html, json) {
+  const marker = 'var CONFIGS = ';
+  const start = html.indexOf(marker);
+  if (start === -1) throw new Error('CONFIGS marker not found');
+  let pos = start + marker.length;
+  let braceCount = 0;
+  let started = false;
+  while (pos < html.length) {
+    if (html[pos] === '{') { braceCount++; started = true; }
+    else if (html[pos] === '}') { braceCount--; }
+    pos++;
+    if (started && braceCount === 0) break;
+  }
+  // skip past optional ';'
+  while (pos < html.length && html[pos] !== '\n') pos++;
+  if (html[pos] === '\n') pos++;
+  return html.slice(0, start) + marker + json + ';\n' + html.slice(pos);
+}
+
 app.post('/api/save-config', (req, res) => {
   try {
     const configs = req.body;
     const indexPath = path.join(__dirname, 'public', 'index.html');
     let html = fs.readFileSync(indexPath, 'utf-8');
     const json = JSON.stringify(configs, null, 2);
-    const updated = html.replace(/var CONFIGS = \{[\s\S]*?\};\n/, 'var CONFIGS = ' + json + ';\n');
+    const updated = replaceConfigsInHTML(html, json);
     fs.writeFileSync(indexPath, updated, 'utf-8');
-    // Also save to configs.json for the original API
     writeConfigs(configs);
     res.json({ ok: true });
   } catch (e) {

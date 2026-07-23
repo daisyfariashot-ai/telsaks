@@ -431,7 +431,20 @@ document.getElementById('saveBtn').addEventListener('click', function() {
 
 function buildUpdatedHTML(json) {
   return fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
-    return html.replace(/var CONFIGS = \{[\s\S]*?\};\n/, 'var CONFIGS = ' + json + ';\n');
+    var marker = 'var CONFIGS = ';
+    var start = html.indexOf(marker);
+    if (start === -1) throw new Error('CONFIGS not found');
+    var pos = start + marker.length;
+    var braceCount = 0, first = false;
+    while (pos < html.length) {
+      if (html[pos] === '{') { braceCount++; first = true; }
+      else if (html[pos] === '}') { braceCount--; }
+      if (first && braceCount === 0) break;
+      pos++;
+    }
+    while (pos < html.length && html[pos] !== '\n') pos++;
+    if (html[pos] === '\n') pos++;
+    return html.slice(0, start) + marker + json + ';\n' + html.slice(pos);
   });
 }
 
