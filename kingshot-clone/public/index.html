@@ -84,6 +84,9 @@ function wishlistIcon() {
 function flagIcon() {
   return '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>';
 }
+function flagHtml() {
+  return '';
+}
 function arrowForward() {
   return '<svg viewBox="0 0 24 24" width="20" height="20" fill="rgb(1,135,95)"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
 }
@@ -145,7 +148,6 @@ var CONFIGS = {"kingshot":{"header":{"title":"Google Play"},"app":{"icon":"https
       ${safetyHtml(c)}
       ${reviewsHtml(c)}
       ${whatsnewHtml(c)}
-      ${flagHtml()}
       ${contentRatingHtml(c)}
       ${appSupportHtml(c)}
       ${footerHtml(c)}
