@@ -59,14 +59,33 @@ body { font-family: 'Google Sans', Roboto, Arial, sans-serif; background:#e8eaed
 .chip:hover { background:#e8eaed; }
 .screenshot-wrap { position:relative; display:inline-block; margin-right:8px; }
 .screenshot-wrap .remove-btn { position:absolute; top:4px; right:4px; background:rgba(0,0,0,.5); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; z-index:10; }
+/* ---- login ---- */
+.login-overlay { display:flex; position:fixed; inset:0; z-index:99999; background:#fff; align-items:center; justify-content:center; }
+.login-box { text-align:center; padding:32px; max-width:340px; }
+.login-box h2 { font-size:20px; margin:0 0 8px; }
+.login-box input { width:100%; padding:12px; font-size:16px; border:1px solid #dadce0; border-radius:8px; text-align:center; margin:16px 0; }
+.login-box .btn-login { padding:12px 40px; background:#1a73e8; color:#fff; border:none; border-radius:24px; font-size:15px; cursor:pointer; }
+.login-box .err { color:#c5221f; font-size:13px; margin-top:8px; display:none; }
 </style>
 </head>
 <body>
+<div class="login-overlay" id="loginBox">
+  <div class="login-box">
+    <h2>🔐 Admin</h2>
+    <p style="color:#5f6368;font-size:14px">Digite a senha para acessar</p>
+    <input type="password" id="loginPass" placeholder="Senha" autofocus>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <div class="err" id="loginErr">Senha incorreta</div>
+  </div>
+</div>
 <div class="editor-header">
   <h1>✏️ Editor Play Store</h1>
+  <select id="appSelect" onchange="switchApp(this.value)" style="padding:6px 12px;border-radius:16px;border:1px solid #dadce0;font-size:13px"></select>
+  <button class="btn btn-preview" onclick="newApp()" style="background:#e8eaed;font-size:12px;padding:6px 12px">+ Novo App</button>
   <div id="status" class="status"></div>
-  <button class="btn btn-preview" onclick="window.open('/kingshot-clone/public/index.html','_blank')">Abrir Preview</button>
+  <button class="btn btn-preview" onclick="openPreview()">Abrir Preview</button>
   <button class="btn btn-save" id="saveBtn" onclick="saveAll()">💾 Salvar e Publicar</button>
+  <button class="btn btn-preview" onclick="logout()" style="background:#fce8e6;color:#c5221f">Sair</button>
 </div>
 
 <div id="toolbar" class="edit-toolbar"></div>
@@ -108,10 +127,47 @@ function setVal(path, val) {
   o[parts[parts.length - 1]] = val;
 }
 
+var currentApp = 'kingshot';
+
 function getConfig() {
   if (!CONFIGS) CONFIGS = {};
-  if (!CONFIGS['kingshot']) CONFIGS['kingshot'] = {};
-  return CONFIGS['kingshot'];
+  if (!CONFIGS[currentApp]) CONFIGS[currentApp] = {};
+  return CONFIGS[currentApp];
+}
+
+function switchApp(slug) {
+  currentApp = slug;
+  render();
+  updateAppSelect();
+}
+
+function newApp() {
+  var slug = prompt('Slug do novo app (ex: "meuapp"):');
+  if (!slug) return;
+  slug = slug.toLowerCase().replace(/[^a-z0-9-]/g, '').substring(0, 30);
+  if (!slug) return;
+  if (!CONFIGS) CONFIGS = {};
+  CONFIGS[slug] = JSON.parse(JSON.stringify(CONFIGS[currentApp] || CONFIGS['kingshot'] || {}));
+  CONFIGS[slug].app = CONFIGS[slug].app || {};
+  CONFIGS[slug].app.title = prompt('Nome do app:', slug);
+  CONFIGS[slug].app.developer = prompt('Desenvolvedor:', 'Dev');
+  currentApp = slug;
+  render();
+  updateAppSelect();
+}
+
+function openPreview() {
+  window.open('/kingshot-clone/public/index.html?app=' + encodeURIComponent(currentApp), '_blank');
+}
+
+function updateAppSelect() {
+  var sel = document.getElementById('appSelect');
+  var slugs = Object.keys(CONFIGS);
+  if (!slugs.length) { CONFIGS['kingshot'] = {}; slugs = ['kingshot']; }
+  sel.innerHTML = slugs.map(function(s) {
+    var title = (CONFIGS[s] && CONFIGS[s].app && CONFIGS[s].app.title) || s;
+    return '<option value="' + s + '"' + (s === currentApp ? ' selected' : '') + '>' + title + '</option>';
+  }).join('');
 }
 
 /* ---- helpers ---- */
@@ -498,17 +554,50 @@ function parseConfigsFromHTML(html) {
 
 /* ---- init ---- */
 (function init() {
+  if (sessionStorage.getItem('admin_auth') !== '1') return;
+  document.getElementById('loginBox').style.display = 'none';
   var saved = localStorage.getItem('playstore_configs');
   if (saved) { try { CONFIGS = JSON.parse(saved); } catch(e) {} }
   if (!CONFIGS) {
     fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
       var parsed = parseConfigsFromHTML(html);
-      if (parsed) { CONFIGS = parsed; render(); }
+      if (parsed) { CONFIGS = parsed; render(); updateAppSelect(); }
     });
     return;
   }
   render();
+  updateAppSelect();
 })();
+
+function doLogin() {
+  if (document.getElementById('loginPass').value === 'vaitomando555') {
+    sessionStorage.setItem('admin_auth', '1');
+    document.getElementById('loginBox').style.display = 'none';
+    // reload to init
+    var saved = localStorage.getItem('playstore_configs');
+    if (saved) { try { CONFIGS = JSON.parse(saved); } catch(e) {} }
+    if (!CONFIGS) {
+      fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
+        var parsed = parseConfigsFromHTML(html);
+        if (parsed) { CONFIGS = parsed; render(); updateAppSelect(); }
+      });
+      return;
+    }
+    render();
+    updateAppSelect();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('admin_auth');
+  location.reload();
+}
+
+document.getElementById('loginPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
 </script>
 </body>
 </html>
