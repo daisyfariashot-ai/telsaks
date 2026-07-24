@@ -556,6 +556,10 @@ function parseConfigsFromHTML(html) {
 (function init() {
   if (sessionStorage.getItem('admin_auth') !== '1') return;
   document.getElementById('loginBox').style.display = 'none';
+  loadAndRender();
+})();
+
+function loadAndRender() {
   var saved = localStorage.getItem('playstore_configs');
   if (saved) { try { CONFIGS = JSON.parse(saved); } catch(e) {} }
   if (!CONFIGS) {
@@ -567,27 +571,15 @@ function parseConfigsFromHTML(html) {
   }
   render();
   updateAppSelect();
-})();
+}
 
 function doLogin() {
-  if (document.getElementById('loginPass').value === 'vaitomando555') {
-    sessionStorage.setItem('admin_auth', '1');
-    document.getElementById('loginBox').style.display = 'none';
-    // reload to init
-    var saved = localStorage.getItem('playstore_configs');
-    if (saved) { try { CONFIGS = JSON.parse(saved); } catch(e) {} }
-    if (!CONFIGS) {
-      fetch('index.html').then(function(r) { return r.text(); }).then(function(html) {
-        var parsed = parseConfigsFromHTML(html);
-        if (parsed) { CONFIGS = parsed; render(); updateAppSelect(); }
-      });
-      return;
-    }
-    render();
-    updateAppSelect();
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
+  if (document.getElementById('loginPass').value !== 'vaitomando555') {
+    document.getElementById('loginErr').style.display = 'block'; return;
   }
+  sessionStorage.setItem('admin_auth', '1');
+  document.getElementById('loginBox').style.display = 'none';
+  loadAndRender();
 }
 
 function logout() {
