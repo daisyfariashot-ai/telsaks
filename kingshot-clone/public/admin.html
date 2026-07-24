@@ -204,8 +204,9 @@ function buildPreview() {
 
   // install + actions
   var installUrl = esc(c.installUrl || '');
-  html += '<div class="install-btn-wrapper"><button class="btn-install editable" data-path="installUrl">' + (installUrl ? '&#x2B07; Baixar APK' : 'Instalar') + '</button></div>';
-  if (installUrl) html += '<div style="text-align:center;margin-top:4px"><small style="color:#01875f;font-size:11px">APK configurado: clique para alterar</small></div>';
+  var installLabel = esc(c.installLabel || 'Baixar APK');
+  html += '<div class="install-btn-wrapper"><button class="btn-install editable" data-path="installUrl">' + (installUrl ? '&#x2B07; ' + installLabel : 'Instalar') + '</button></div>';
+  if (installUrl) html += '<div style="text-align:center;margin-top:4px"><small style="color:#01875f;font-size:11px" class="editable" data-path="installLabel">Label: ' + installLabel + ' (clique para editar)</small></div>';
   html += '<div class="action-buttons"><button class="btn-circle">★</button></div>';
 
   // screenshots
@@ -356,7 +357,7 @@ function applyText() {
 function openApkEditor(path, el) {
   var current = getVal(path) || '';
   var up = document.getElementById('uploader');
-  up.innerHTML = '<div class="drop-area" id="dropArea" onclick="document.getElementById(\'apkInput\').click()" style="pointer-events:auto">' + (current ? 'APK atual: ' + current.split('/').pop() : 'Clique para enviar APK') + '<br><small style="color:#9aa0a6">ou arraste aqui (max 50MB)</small></div><input type="file" id="apkInput" accept=".apk,application/vnd.android.package-archive" style="display:none"><div id="apkStatus" style="text-align:center;margin-top:6px;font-size:12px;color:#137333;display:' + (current?'block':'none') + '">✅ APK configurado</div><hr style="margin:8px 0;border:none;border-top:1px solid #dadce0"><label style="font-size:11px;color:#5f6368">Ou cole a URL:</label><input class="url-field" id="urlField" placeholder="https://..." value="' + esc(current) + '"><button class="btn-apply" onclick="applyApkUrl()" style="margin-top:4px">Aplicar URL</button><button class="btn-remove" onclick="setVal(\'installUrl\',\'\');render();hideAllPanels();showStatus(\'APK removido!\',\'success\')" style="margin-top:4px;margin-left:4px">Remover APK</button>';
+  up.innerHTML = '<div class="drop-area" id="dropArea" onclick="document.getElementById(\'apkInput\').click()" style="pointer-events:auto">' + (current ? 'APK atual: ' + current.split('/').pop() : 'Clique para enviar APK') + '<br><small style="color:#9aa0a6">ou arraste aqui (max 50MB)</small></div><input type="file" id="apkInput" accept=".apk,application/vnd.android.package-archive" style="display:none"><div id="apkStatus" style="text-align:center;margin-top:6px;font-size:12px;color:#137333;display:' + (current?'block':'none') + '">✅ APK configurado</div><hr style="margin:8px 0;border:none;border-top:1px solid #dadce0"><label style="font-size:11px;color:#5f6368">Texto do botão:</label><input class="url-field" id="labelField" value="' + esc(getVal('installLabel')||'Baixar APK') + '" style="margin-bottom:4px"><label style="font-size:11px;color:#5f6368">Ou cole a URL:</label><input class="url-field" id="urlField" placeholder="https://..." value="' + esc(current) + '"><button class="btn-apply" onclick="applyApkAll()" style="margin-top:4px">Aplicar</button><button class="btn-remove" onclick="setVal(\'installUrl\',\'\');setVal(\'installLabel\',\'\');render();hideAllPanels();showStatus(\'APK removido!\',\'success\')" style="margin-top:4px;margin-left:4px">Remover APK</button>';
   up.classList.add('show');
   
   var rect = el.getBoundingClientRect();
@@ -395,11 +396,11 @@ function uploadApk(file) {
     });
 }
 
-function applyApkUrl() {
-  var val = document.getElementById('urlField').value;
-  setVal('installUrl', val);
+function applyApkAll() {
+  setVal('installUrl', document.getElementById('urlField').value);
+  setVal('installLabel', document.getElementById('labelField').value || 'Baixar APK');
   render();
-  showStatus('URL do APK aplicada!', 'success');
+  showStatus('APK e label aplicados!', 'success');
 }
 
 function openImageEditor(path, imgEl) {
